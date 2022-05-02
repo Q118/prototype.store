@@ -1,0 +1,68 @@
+{
+    "data": {
+        "trueResponse": {
+            "evaluationStatus": "success",
+            "rule": {
+                "input": "length(@lineItem.lineItemDescription) == 0",
+                "output": false,
+                "evaluatedRule": {
+                    "type": "relationalExpression",
+                    "relation": "equality",
+                    "leftOperand": {
+                        "type": "simpleStringFunction",
+                        "name": "length",
+                        "expression": {
+                            "type": "fieldIdentifier",
+                            "objectName": "lineItem",
+                            "fieldPath": [
+                                "lineItemDescription"
+                            ],
+                            "lookUpStatus": "found",
+                            "value": "VENDOR: NC Information Data, Inc.; INVOICE#: 99999; DATE: 11/5/2020  -  Customer # 1362 - Criminal Background Checks & Driving Records - 9/1/20 - 9/30/20",
+                            "computedValue": "VENDOR: NC Information Data, Inc.; INVOICE#: 99999; DATE: 11/5/2020  -  Customer # 1362 - Criminal Background Checks & Driving Records - 9/1/20 - 9/30/20"
+                        },
+                        "computedValue": 153
+                    },
+                    "rightOperand": {
+                        "type": "numberConstant",
+                        "value": 0,
+                        "computedValue": 0
+                    },
+                    "computedValue": false
+                }
+            }
+        },
+        "falseResponse": {
+            "evaluationStatus": "success",
+            "rule": {
+                "input": "length(@lineItem.lineItemDescription) == 0",
+                "output": false,
+                "evaluatedRule": {
+                    "type": "relationalExpression",
+                    "relation": "equality",
+                    "leftOperand": {
+                        "type": "simpleStringFunction",
+                        "name": "length",
+                        "expression": {
+                            "type": "fieldIdentifier",
+                            "objectName": "lineItem",
+                            "fieldPath": [
+                                "lineItemDescription"
+                            ],
+                            "lookUpStatus": "found",
+                            "value": "VENDOR: NC Information Data, Inc.; INVOICE#: 99999; DATE: 11/5/2020  -  Customer # 1362 - Criminal Background Checks & Driving Records - 9/1/20 - 9/30/20",
+                            "computedValue": "VENDOR: NC Information Data, Inc.; INVOICE#: 99999; DATE: 11/5/2020  -  Customer # 1362 - Criminal Background Checks & Driving Records - 9/1/20 - 9/30/20"
+                        },
+                        "computedValue": 153
+                    },
+                    "rightOperand": {
+                        "type": "numberConstant",
+                        "value": 0,
+                        "computedValue": 0
+                    },
+                    "computedValue": false
+                }
+            }
+        }
+    }
+}
