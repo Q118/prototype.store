@@ -11,10 +11,17 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@azure/identity": "^2.0.4",
+    "@azure/storage-blob": "^12.9.0",
+    "@azure/storage-queue": "^12.8.0",
+    "dotenv": "^16.0.0",
     "express": "^4.18.1",
     "json-server": "^0.17.0",
     "method-override": "^3.0.0",
+    "morgan": "^1.10.0",
     "nodemon": "^2.0.16",
-    "path": "^0.12.7"
+    "path": "^0.12.7",
+    "rotating-file-stream": "^3.0.3",
+    "winston": "^3.7.2"
   }
 }
