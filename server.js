@@ -110,10 +110,12 @@ const methodOverride = require('method-override');
 
 app.use(express.urlencoded({ extended: true }))
 app.use(methodOverride('_method')); 
+app.use(express.static(path.join(__dirname, 'public')));
 
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
+
 
 app.listen(3000, () => {
     console.log('webApp is running on port 3000');
