@@ -1,5 +1,6 @@
 {
-    "timestamp": 1651526613927,
+    "timestamp": 1651592039159,
+    "processingTime": 109,
     "rawHeaders": [
         "Host",
         "localhost:8888",
@@ -34,9 +35,16 @@
         "Cookie",
         "connect.sid=s%3A8w2msfne-VVm53Az63jxhUNXpw0cK72r.x0ASwarD50Dvh2PSR2Z1skG9%2FIzHqdBhwYn4ZVhgrZ0"
     ],
+    "body": [],
+    "errorMessage": null,
     "httpVersion": "1.1",
     "method": "GET",
     "remoteAddress": "::1",
     "remoteFamily": "IPv6",
-    "url": "/"
+    "url": "/",
+    "response": {
+        "statusCode": 200,
+        "statusMessage": "OK",
+        "headers": {}
+    }
 }
