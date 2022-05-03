@@ -19,7 +19,7 @@ const server = http.createServer((request, response) => {
         if (body.length > 0) {
             body = Buffer.concat(body).toString();
         }
-        console.log("at assemble" + JSON.stringify(body));
+        console.log("body at assemble: " + body); // debug
     };
 
     const getError = error => {
@@ -67,6 +67,7 @@ const log = (request, response, errorMessage) => {
     const { statusCode, statusMessage } = response;
     const headers = response.getHeaders();
 
+    //todo change console log to log to file
     console.log(
         JSON.stringify({
             timestamp: Date.now(),
@@ -98,4 +99,22 @@ const process = (request, response) => {
 
 server.listen(8888, () => {
     console.log("Node server is running on port 8888");
+});
+
+
+// mocked client side for development
+const express = require('express');
+const path = require('path');
+const app = express();
+const methodOverride = require('method-override');
+
+app.use(express.urlencoded({ extended: true }))
+app.use(methodOverride('_method')); 
+
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'index.html'));
+});
+
+app.listen(3000, () => {
+    console.log('webApp is running on port 3000');
 });
