@@ -20,14 +20,18 @@ const nodeServer = http.createServer((request, response) => {
     });
 
     //The IncomingMessage class implements the ReadableStream interface. 
-    //uses the events of that interface to signal when body data from the client arrives.
+    // >> uses the events of that interface to signal when body data from the client arrives.
 
     response.on("finish", () => {
 
-        // ServerResponse class has a finish event that is fired the sever finished sending it’s response. This doesn’t mean the client received everything, but it’s an indicator that the api work is done.
+        // ServerResponse's finish event is fired the sever finished sending it’s response. This doesn’t mean the client received everything, but it’s an indicator that the api work is done.
 
         const { rawHeaders, httpVersion, method, socket, url } = request;
         const { remoteAddress, remoteFamily } = socket;
+
+        // serverResponse class 
+        const { statusCode, statusMessage } = response;
+        const headers = response.getHeaders();
 
         console.log(
             JSON.stringify({
@@ -40,7 +44,12 @@ const nodeServer = http.createServer((request, response) => {
                 method,
                 remoteAddress,
                 remoteFamily,
-                url
+                url,
+                response: {
+                    statusCode,
+                    statusMessage,
+                    headers
+                }
             }, null, 2) //pretty-print
         );
     });
@@ -48,8 +57,8 @@ const nodeServer = http.createServer((request, response) => {
     process(request, response);
 });
 
-//We passed the processing of our request to a separate function to simulate an other module that takes care of it. The processing takes place asynchronously, because of the setTimeout, so synchronous logging wouldn’t get the desired result, but the finish event takes care of this by firing after response.end() was called.
-
+//passing the processing of our request asynchronously to a separate function to simulate an other module that takes care of it. 
+// because of the setTimeout, synchronous logging wouldn’t get the desired result, but the finish event takes care of this by firing after response.end() is called.
 const process = (request, response) => {
     setTimeout(() => {
         response.end();
