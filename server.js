@@ -10,7 +10,7 @@ const { QueueServiceClient, StorageSharedKeyCredential } = require("@azure/stora
 
 require("dotenv").config();
 
-async function main() {
+async function main(x) {
     // const sharedKeyCredential = new StorageSharedKeyCredential(account, accountKey);
     const connString = process.env.AZURE_STORAGE_CONNECTION_STRING;
     const queueServiceClient = QueueServiceClient.fromConnectionString(connString);
@@ -29,27 +29,27 @@ async function main() {
     );
 
     // Send a message into the queue using the sendMessage method.
-    const enqueueQueueResponse = await queueClient.sendMessage("Hello World!");
+    const enqueueQueueResponse = await queueClient.sendMessage(x);
     console.log(
         `Sent message successfully, service assigned message ID: ${enqueueQueueResponse.messageId}, service assigned request ID: ${enqueueQueueResponse.requestId}`
     );
 }
 
-main().then(() => {
-    console.log("Done");
-}).catch((ex) => console.log(ex.message));
+// main().then(() => {
+//     console.log("Done");
+// }).catch((ex) => console.log(ex.message));
 
 /**
  * 
  * @param {obj} message 
  */
-const logToFile = async (message) => {
-    fs.appendFile("log.txt", message + ",\n", (err) => {
-        if (err) {
-            console.log(err);
-        }
-    });
-};
+// const logToFile = async (message) => {
+//     fs.appendFile("log.txt", message + ",\n", (err) => {
+//         if (err) {
+//             console.log(err);
+//         }
+//     });
+// };
 
 let requestStart;
 let body = [];
@@ -110,30 +110,30 @@ const log = async (request, response, errorMessage) => {
     const { remoteAddress, remoteFamily } = socket;
     const { statusCode, statusMessage } = response;
     const headers = response.getHeaders();
-    await queueClient.sendMessage(
-        JSON.stringify(
-            {
-                timestamp: Date.now(),
-                processingTime: Date.now() - requestStart,
-                rawHeaders,
-                body,
-                errorMessage,
-                httpVersion,
-                method,
-                remoteAddress,
-                remoteFamily,
-                url,
-                response: {
-                    statusCode,
-                    statusMessage,
-                    headers
-                }
-            })
-    ).then(() => {
-        console.log("data logged to file")
-    }).catch(err => {
-        console.log(err);
-    });
+
+    let message = JSON.stringify({
+        timestamp: Date.now(),
+        processingTime: Date.now() - requestStart,
+        rawHeaders,
+        body,
+        errorMessage,
+        httpVersion,
+        method,
+        remoteAddress,
+        remoteFamily,
+        url,
+        response: {
+            statusCode,
+            statusMessage,
+            headers
+        }
+    })
+
+    main(message).then(() => {
+        console.log("Done");
+    }).catch((ex) => console.log(ex.message));
+
+
 };
 
 const myProcess = (request, response) => {
