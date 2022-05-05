@@ -152,18 +152,30 @@
                 <h4>
                     <i class="fas fa-history"></i>&nbsp;History
                 </h4>
+
+
                 <div id="history-container" class="container">
-            
+
+                    <button type="button" class="collapsible">
                         <strong id="title-blob"></strong>
-                        <div id="request">
-                            <br>
-                            REQUEST
-                            <div id="request-lite">
-                               
-                            </div>
-                            <div id="request-details">
-                                 Body:&nbsp;
-                            </div>
+                        <!-- <i>&nbsp;click to expand</i> -->
+                    </button>
+
+                    <div id="request" class="content">
+                        <br>
+                        REQUEST
+                        <div id="request-lite">
+                        </div>
+                        <div id="request-headers">
+                            <button type="button" class="collapsible">
+                                Headers:&nbsp;
+                            </button>
+                        </div>
+                        <div id="request-details">
+                            <button type="button" class="collapsible">
+                                Body:&nbsp;
+                            </button>
+                        </div>
                         <div id="response">
                             <br>
                             RESPONSE
@@ -175,6 +187,7 @@
                             </div>
                         </div>
                     </div>
+
                 </div>
 
             </div>
@@ -190,6 +203,7 @@
         integrity="sha384-Piv4xVNRyMGpqkS2by6br4gNJ7DXjqk09RmUpJ8jgGtD7zP9yug3goQfGII0yAns"
         crossorigin="anonymous"></script>
     <script src="/JS/history.js"></script>
+    <script src="/JS/collapse.js"></script>
 </body>
 
 </html>
