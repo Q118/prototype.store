@@ -52,7 +52,8 @@ async function main() {
     let blobs = [];
     for await (const blob of containerClient.listBlobsFlat()) {
         console.log(`- ${blob.name}`);
-        blobNames.push(blob.name);
+        blobNames.push(blob.name
+            );
     }
 
 
@@ -68,13 +69,14 @@ async function main() {
     console.log(blobs.length);
     console.log(blobs[0].data);
     console.log(blobs[0].name);
-    // fs.writeFile("data.json", JSON.stringify(blobs), (err) => {  
-    //     if (err) throw err;
-    //     console.log("The file has been saved!");
-    // })  
+
 
     app.get('/hello', (req, res) => {
-        res.send(blobs[0].data);
+        // res.send(JSON.parse(JSON.stringify(blobs[0].data, undefined, 2)));
+        // res.send(JSON.parse(JSON.stringify(blobs)));
+        res.send(blobs);
+
+        // TODO: send the whole blob array and parse from
     });
 
 }
