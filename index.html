@@ -156,40 +156,47 @@
 
                 <div id="history-container" class="container">
 
-                    <button type="button" class="collapsible">
+
                         <strong id="title-blob"></strong>
-                        <!-- <i>&nbsp;click to expand</i> -->
-                    </button>
 
-                    <div id="request" class="content">
-                        <br>
-                        REQUEST
-                        <div id="request-lite">
+                        <div id="request-lite" class="aBox">
                         </div>
-                        <div id="request-headers">
-                            <button type="button" class="collapsible">
-                                Headers:&nbsp;
-                            </button>
-                        </div>
-                        <div id="request-details">
-                            <button type="button" class="collapsible">
-                                Body:&nbsp;
-                            </button>
-                        </div>
-                        <div id="response">
-                            <br>
-                            RESPONSE
-                            <div id="response-lite">
 
-                            </div>
-                            <div id="response-details">
+                        <strong>REQUEST</strong>
 
-                            </div>
-                        </div>
+
+                        <button type="button" class="collapsible">
+                            Headers:&nbsp;&nbsp;&nbsp;&nbsp;
+                            <i class="fas fa-chevron-down"></i>
+                        </button>
+
+                    <div id="request-headers" class="content">
                     </div>
 
-                </div>
 
+                    <button type="button" class="collapsible">
+                        Body:&nbsp;&nbsp;&nbsp;&nbsp;
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                    <div id="request-details" class="content">
+                    </div>
+
+                    <strong>RESPONSE</strong>
+
+                    <button type="button" class="collapsible">
+                        Headers:&nbsp;&nbsp;&nbsp;&nbsp;
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                    <div id="response-headers" class="content">
+                    </div>
+
+                    <button type="button" class="collapsible">
+                        Body:&nbsp;&nbsp;&nbsp;&nbsp;
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                    <div id="response-details" class="content">
+                    </div>
+                </div>
             </div>
         </div>
     </div>
