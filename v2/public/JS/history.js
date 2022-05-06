@@ -11,13 +11,10 @@ const responseHeadersContainer = document.getElementById("response-headers");
 const responseDetailContainer = document.getElementById("response-details");
 
 //TODO will make this dynamic later, like to loop and display in order of history but for now lets just display the two of them for the mock but also ++ add pagination    
-
-// get the data from /hello route and put it in innerHTML
-
-//prepend <i class="fas fa-chevron-up"></i>
+// add it into ejs
 
 
-fetch("/hello")
+fetch("/blobs")
     .then((response) => response.json())
     .then((data) => {
         const parsedDataOne = JSON.parse(data[0].data);
@@ -51,7 +48,7 @@ fetch("/hello")
                 requestDetailContainer.appendChild(pre)
             } else if (obj === parsedDataOne.response.headers) {
                 responseHeadersContainer.appendChild(pre)
-            } else if (obj === parsedDataOne.response.body) { 
+            } else if (obj === parsedDataOne.response.body) {
                 responseDetailContainer.appendChild(pre)
             } else {
                 console.log("something went wrong parsing the nested objects")
@@ -62,7 +59,7 @@ fetch("/hello")
         handleNested(parsedDataOne.request.headers);
         handleNested(parsedDataOne.response.headers);
         handleNested(parsedDataOne.response.body);
-        
+
 
     }).catch((error) => {
         console.log(error);
