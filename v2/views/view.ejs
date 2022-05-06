@@ -1,36 +1,41 @@
 <%- contentFor('header') %>
-<h1 class="page-title"><%= _locals.title %></h1>
+    <h1 class="page-title">
+        <%= _locals.title %>
+    </h1>
 
-<%- contentFor('footer') %>
-<h1>This is the footer</h1>
+    <%- contentFor('footer') %>
+        <h5 class="text-center">This is the footer</h5>
 
-<% /*
-Content for the `body` section should either be the first thing defined
-in the view, or it has to be declared just like any other section.
-*/ %>
-<%- contentFor('body') %>
 
-This is part of the body.
+        <%- contentFor('body') %>
+            <%- include('includes/navbar') %>
+                <div class="container-fluid mt-5">
+                    <div class="row">
+                        <%- include('includes/sidebar') %>
 
-<% /*
-When style extraction is enabled, any custom styles that a page defines, will
-be extracted out of the content and made available in the specific placeholder.
-In our example, even though we're defining a <style> within the body, this will
-be placed, according to our layout, inside of the <head> element.
-<link> blocks to load external stylesheets are also extracted when the option
-is enabled.
-*/ %>
+                            <%- include('pages/history') %>
+                    </div>
+                </div>
 
-<style>
-  .page-message { color: blue }
-</style>
 
-<% /*
-Like stylesheets, scripts can also be extracted.
-This script block will end up at the end of the HTML document.
-*/ %>
-<script>
-  // Script content!
-</script>
 
-<h1 class="page-message"><%= message %></h1>
+
+
+
+
+                <% /* style and script extraction is enabled */ %>
+                    <link rel="stylesheet"
+                        href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css"
+                        integrity="sha384-B0vP5xmATw1+K9KRQjQERJvTumQW0nPEzvF6L/Z6nronJ3oUOFUFpCjEUQouq2+l"
+                        crossorigin="anonymous">
+                    <link rel="stylesheet" href="/fonts/webfonts/all.css">
+
+
+                    <script src="https://code.jquery.com/jquery-3.6.0.min.js"
+                        integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4="
+                        crossorigin="anonymous"></script>
+                    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"
+                        integrity="sha384-Piv4xVNRyMGpqkS2by6br4gNJ7DXjqk09RmUpJ8jgGtD7zP9yug3goQfGII0yAns"
+                        crossorigin="anonymous"></script>
+                    <script src="/JS/history.js"></script>
+                    <script src="/JS/collapse.js"></script>

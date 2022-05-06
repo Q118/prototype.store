@@ -1,0 +1,60 @@
+<nav class="navbar fixed-top navbar-expand-lg navbar-light bg-light shadow-lg" role="navigation">
+
+    <a class="navbar-brand" href="/">
+        <img src="/logo/funnylogo.png" width="30" height="30" alt="">
+        Core Compliance
+    </a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <!-- Collect the nav links, forms, and other content for toggling -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <div class="nav-item">
+            <div class="nav-item navbar-text">Tenant:&nbsp;&nbsp;</div>
+        </div>
+        <div class="nav navbar-nav mr-auto">
+            <div class="nav-item">
+                <form id="navbarTenantForm" class="form-inline" method="get" action="/tenant">
+                    <div class="form-group">
+                        <select id="navbarTenantIdSelect" name="tenantId" class="form-control-sm" style="width:430px;"
+                            onchange="changeTenant()" autofocus="">
+                            <option value="">(Select a tenant...)</option>
+
+                            <option value="acctenantusdev" selected="">Aderant US Dev Environment (bbaqa8.1)
+                                (acctenantusdev)</option>
+
+                        </select>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+
+
+
+        <div class="nav navbar-nav ml-auto">
+            <li class="nav-item">
+                <a class="nav-link" href="/api/docs" target="_blank">API</a>
+            </li>
+            <div class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" data-toggle="dropdown" role="button" aria-haspopup="true"
+                    aria-expanded="false">
+                    Data
+                </a>
+            </div>
+            <!-- Admin -->
+            <!-- Profile -->
+            <div class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" data-toggle="dropdown" role="button" aria-haspopup="true"
+                    aria-expanded="false">
+                    Profile
+                </a>
+                <div class="dropdown-menu dropdown-menu-right">
+                    <a class="dropdown-item" href="#">View</a>
+                    <a class="dropdown-item" href="#">Logout</a>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</nav>
