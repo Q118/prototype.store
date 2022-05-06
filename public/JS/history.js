@@ -23,8 +23,6 @@ fetch("/hello")
         const parsedDataOne = JSON.parse(data[0].data);
         const parsedDataTwo = JSON.parse(data[1].data);
 
-        // console.log(parsedDataOne.request);
-
         titleBlob.innerHTML = data[0].name.replace(".json", "");
 
 
