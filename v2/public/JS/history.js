@@ -14,53 +14,53 @@ const responseDetailContainer = document.getElementById("response-details");
 // add it into ejs
 
 
-fetch("/blobs")
-    .then((response) => response.json())
-    .then((data) => {
-        const parsedDataOne = JSON.parse(data[0].data);
-        const parsedDataTwo = JSON.parse(data[1].data);
+// fetch("/blobs") // instead of fetch can you dynamically load it into the view?...
+//     .then((response) => response.json())
+//     .then((data) => {
+//         const parsedDataOne = JSON.parse(data[0].data);
+//         const parsedDataTwo = JSON.parse(data[1].data);
 
-        titleBlob.innerHTML = data[0].name.replace(".json", "");
-
-
-
-        for (let [key, value]
-            of Object.entries(parsedDataOne.request)) {
-            if (key === "body" || key === "headers") {
-                continue;
-            }
-            if (key === "startTime" || key === "endTime") {
-                value = new Date(value);
-            }
-            const div = document.createElement("div");
-            div.innerHTML = `${key}: ${value}`;
-            requestLiteContainer.appendChild(div);
-        }
-
-        //handle headers and body
-        const handleNested = (obj) => {
-            const pre = document.createElement("pre");
-            pre.innerHTML = JSON.stringify(obj, undefined, 2);
-
-            if (obj === parsedDataOne.request.headers) {
-                requestHeadersContainer.appendChild(pre)
-            } else if (obj === parsedDataOne.request.body) {
-                requestDetailContainer.appendChild(pre)
-            } else if (obj === parsedDataOne.response.headers) {
-                responseHeadersContainer.appendChild(pre)
-            } else if (obj === parsedDataOne.response.body) {
-                responseDetailContainer.appendChild(pre)
-            } else {
-                console.log("something went wrong parsing the nested objects")
-            }
-        }
-
-        handleNested(parsedDataOne.request.body);
-        handleNested(parsedDataOne.request.headers);
-        handleNested(parsedDataOne.response.headers);
-        handleNested(parsedDataOne.response.body);
+//         titleBlob.innerHTML = data[0].name.replace(".json", "");
 
 
-    }).catch((error) => {
-        console.log(error);
-    })
+
+//         for (let [key, value]
+//             of Object.entries(parsedDataOne.request)) {
+//             if (key === "body" || key === "headers") {
+//                 continue;
+//             }
+//             if (key === "startTime" || key === "endTime") {
+//                 value = new Date(value).toLocaleString();
+//             }
+//             const div = document.createElement("div");
+//             div.innerHTML = `${key}: ${value}`;
+//             requestLiteContainer.appendChild(div);
+//         }
+
+//         //handle headers and body
+//         const handleNested = (obj) => {
+//             const pre = document.createElement("pre");
+//             pre.innerHTML = JSON.stringify(obj, undefined, 2);
+
+//             if (obj === parsedDataOne.request.headers) {
+//                 requestHeadersContainer.appendChild(pre)
+//             } else if (obj === parsedDataOne.request.body) {
+//                 requestDetailContainer.appendChild(pre)
+//             } else if (obj === parsedDataOne.response.headers) {
+//                 responseHeadersContainer.appendChild(pre)
+//             } else if (obj === parsedDataOne.response.body) {
+//                 responseDetailContainer.appendChild(pre)
+//             } else {
+//                 console.log("something went wrong parsing the nested objects")
+//             }
+//         }
+
+//         handleNested(parsedDataOne.request.body);
+//         handleNested(parsedDataOne.request.headers);
+//         handleNested(parsedDataOne.response.headers);
+//         handleNested(parsedDataOne.response.body);
+
+
+//     }).catch((error) => {
+//         console.log(error);
+//     })

@@ -65,8 +65,7 @@ async function main() {
     let blobs = [];
     for await (const blob of containerClient.listBlobsFlat()) {
         console.log(`- ${blob.name}`);
-        blobNames.push(blob.name
-        );
+        blobNames.push(blob.name);
     }
 
 
@@ -92,6 +91,22 @@ async function main() {
         // TODO: send the whole blob array and parse from
     });
 
+    /**
+     * @summary Routes
+     */
+    app.get("/", (req, res) => {
+        // render the main page
+        res.render('view', {
+            blobs,
+            title: "Compliance Rules Workbench"
+        });
+    });
+
+    app.listen(3000, () => {
+        console.log('webApp is running on port 3000');
+    });
+
+
 }
 
 main().catch((error) => {
@@ -105,18 +120,3 @@ main().catch((error) => {
 
 
 
-/**
- * @summary Routes
- */
-app.get("/", (req, res) => {
-    // render the main page
-    res.render('view', {
-        name: "shelby",
-        message: "This is a message",
-        title: "Compliance Rules Workbench"
-    });
-});
-
-app.listen(3000, () => {
-    console.log('webApp is running on port 3000');
-});
