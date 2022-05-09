@@ -51,21 +51,27 @@ morgan.token('res-headers', (_req, res) =>
 )
 
 
-// setup the logger
-app.use(morgan(`GUID: :id,
-IP: :remote-addr,
-Time: [:date[clf]],
-Method: :method,
-URL: :url,  
-Status: :status,
-Content-Length: :res[content-length],
-Elapsed-Time :total-time[digits] ms,
-REQUEST 
-Headers: :req-headers, 
-Body: :req-body, 
-RESPONSE 
-Headers: :res-headers, 
-Body: :res-body
+/**
+ * @description - set up the logger
+ */
+app.use(morgan(`{
+"GUID": ":id",
+"IP": ":remote-addr",
+"Time": ":date[clf]",
+"Method": ":method",
+"URL": ":url",  
+"Status": ":status",
+"Content-Length": ":res[content-length]",
+"Elapsed-Time": ":total-time[digits] ms",
+"REQUEST": { 
+"Headers": :req-headers, 
+"Body": :req-body
+}, 
+"RESPONSE": { 
+"Headers": :res-headers, 
+"Body": :res-body
+}
+}
 `, { stream: accessLogStream }))
 
 
