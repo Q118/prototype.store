@@ -1,102 +1,63 @@
-const express = require('express');
-const path = require('path');
-const app = express();
-const methodOverride = require('method-override');
-// Setting up express to use json and set it to req.body
+var express = require('express')
+var fs = require('fs')
+var morgan = require('morgan')
+var path = require('path')
+
+var app = express()
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(methodOverride('_method'));
-app.use(express.static(path.join(__dirname, 'public')));
 
-const fs = require('fs');
-
-/**
- * @summary authenticate with the storage service using a connection string
- */
-const { BlobServiceClient } = require("@azure/storage-blob");
-require("dotenv").config();
-const { streamToBuffer } = require("./utils/stream");
-
-async function main() {
-    const STORAGE_CONNECTION_STRING = process.env.AZURE_STORAGE_CONNECTION_STRING || "";
-    // Note - Account connection string can only be used in node.
-    const blobServiceClient = BlobServiceClient.fromConnectionString(STORAGE_CONNECTION_STRING);
-
-    let i = 1;
-    // lists all containers to console
-    for await (const container of blobServiceClient.listContainers()) {
-        console.log(`Container ${i++}: ${container.name}`);
-    }
-
-    /**
-     * @summary create and then delete a container 
-     * */
-    //    const containerName = `newcontainer${new Date().getTime()}`;
-    //    const containerClient = blobServiceClient.getContainerClient(containerName);
-    //    const createContainerResponse = await containerClient.create();
-    //    console.log(`Create container ${containerName} successfully`, createContainerResponse.requestId); 
-    //! Delete container
-    //await containerClient.delete();
-    //console.log("deleted container");
+const { v4: genId } = require('uuid');
+// create a write stream (in append mode)
+var accessLogStream = fs.createWriteStream(path.join(__dirname, 'access.log'), { flags: 'a' })
 
 
-
-    /**
-     * @summary get contents of each blob in the container
-     */
-    const containerClient = blobServiceClient.getContainerClient("apirequests");
-    // Iterate over all blobs in the container
-    console.log("Blobs:");
-    let blobNames = [];
-    let blobs = [];
-    for await (const blob of containerClient.listBlobsFlat()) {
-        console.log(`- ${blob.name}`);
-        blobNames.push(blob.name
-            );
-    }
-
-
-
-    // grab the contents of inside each blob
-    for (let i = 0; i < blobNames.length; i++) {
-        const blobClient = containerClient.getBlobClient(blobNames[i]);
-        const downloadBlockBlobResponse = await blobClient.download();
-        const downloaded = await streamToBuffer(downloadBlockBlobResponse.readableStreamBody);
-        let newObj = { name: blobNames[i], data: downloaded.toString() };
-        blobs.push(newObj);
-    };
-    console.log(blobs.length);
-    console.log(blobs[0].data);
-    console.log(blobs[0].name);
-
-
-    app.get('/hello', (req, res) => {
-        // res.send(JSON.parse(JSON.stringify(blobs[0].data, undefined, 2)));
-        // res.send(JSON.parse(JSON.stringify(blobs)));
-        res.send(blobs);
-
-        // TODO: send the whole blob array and parse from
-    });
-
+const assignId = (req, res, next) => {
+    req.id = genId();
+    next()
 }
 
-main().catch((error) => {
-    console.error(error);
-    process.exit(1);
-});
+// setup the guid
+morgan.token('id', getId = (req) => {
+    return req.id
+})
+//? combined format: :remote-addr - :remote-user [:date[clf]] ":method :url HTTP/:http-version" :status :res[content-length] ":referrer" ":user-agent"
+
+
+app.use(assignId)
+
+morgan.token('req-body', function (req, res) {
+    return JSON.stringify(req.body)
+})
+
+const originalSend = app.response.send
+
+app.response.send = function sendOverWrite(body) {
+  originalSend.call(this, body)
+  this.__custombody__ = body
+}
+
+morgan.token('res-body', (_req, res) =>
+  JSON.stringify(res.__custombody__),
+)
+
+// setup the logger
+app.use(morgan(`GUID: :id :remote-addr - :remote-user [:date[clf]] ":method :url HTTP/:http-version" :status :res[content-length] ":referrer" ":user-agent" Body: :req-body, :res-body`, { stream: accessLogStream }))
 
 
 
 
+app.get('/', (req, res) => {
+    
+    setTimeout(function () {
+        res.send('hello, world!')
+    }, 668);
+    
+})
 
-
-
-
-//client side code
-app.get("/", (req, res) => {
-    res.sendFile(path.join(__dirname, "index.html"));
-});
 
 app.listen(3000, () => {
-    console.log('webApp is running on port 3000');
-});
+    console.log('Example app listening on port 3000!')
+})
+
