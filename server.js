@@ -25,7 +25,7 @@ app.use(assignId)
 
 
 /**
- * @description - middleware to capture the request body and headers
+ * @description - capture the request body and headers
  */
 morgan.token('req-body', function (req, res) {
     return JSON.stringify(req.body)
@@ -36,7 +36,7 @@ morgan.token('req-headers', function (req, res) {
 
 
 /**
- * @description - middleware to capture the response body and headers
+ * @description - capture the response body and headers
  */
 const originalSend = app.response.send
 app.response.send = function sendOverWrite(body) {
@@ -52,7 +52,7 @@ morgan.token('res-headers', (_req, res) =>
 
 
 /**
- * @description - set up the logger
+ * @description - set up the logger, write to the file in valid JSON format
  */
 app.use(morgan(`{
 "GUID": ":id",
@@ -71,19 +71,25 @@ app.use(morgan(`{
 "Headers": :res-headers, 
 "Body": :res-body
 }
-}
-`, { stream: accessLogStream }))
+},`, { stream: accessLogStream }))
 
 
 
 
-app.get('/', (req, res) => {
+app.get('/routeOne', (req, res) => {
     setTimeout(function () {
-        res.send('hellooooooo, world!')
+        res.send({"data": 'hellooooooo, world!'})
         // console.log(req.headers);
     }, 668);
 })
 
+
+app.get('/routeTwo', (req, res) => {
+    setTimeout(function () {
+        res.send({"data": 'hellooooooo, world!'})
+        // console.log(req.headers);
+    }, 300);
+})
 
 app.listen(3000, () => {
     console.log('Example app listening on port 3000!')
