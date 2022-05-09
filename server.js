@@ -71,7 +71,9 @@ app.use(morgan(`{
 "Headers": :res-headers, 
 "Body": :res-body
 }
-},`, { stream: accessLogStream }))
+},
+`, { stream: accessLogStream }))
+// skip a line in between each for parsing in stream
 
 
 
