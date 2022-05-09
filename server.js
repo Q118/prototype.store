@@ -40,7 +40,6 @@ async function main() {
     //console.log("deleted container");
 
 
-    //read contents of container and print the data to console
 
     /**
      * @summary get contents of each blob in the container

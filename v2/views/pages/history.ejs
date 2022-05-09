@@ -12,49 +12,74 @@
     </h4>
 
 
+
     <div id="history-container" class="container">
+        <% blobs.forEach(blob=> { %>
+
+            <% console.log("@@" + typeof JSON.parse(blob.data)) %>
+                <h4>
+                    <strong id="title-blob">
+                        <%= blob.name %>
+                    </strong>
+                </h4>
+                <div class="aBox">
+                    <% const obj=JSON.parse(blob.data) %>
+                        <%for (let [key, value] of Object.entries(obj.request)) { %>
+                            <% if (key==="headers" || key==="body" ) { %>
+                                <% continue %>
+                                    <% } %>
+                                        <div id="request-lite">
+                                            <%= key %> : <%= value %>
+                                        </div>
+                                        <% } %>
+                </div>
+                <strong>REQUEST</strong>
+
+                <button type="button" class="collapsible">
+                    Headers:&nbsp;&nbsp;&nbsp;&nbsp;
+                    <i class="fas fa-chevron-down"></i>
+                </button>
+
+                <div id="request-headers" class="content">
+                    <pre>
+                            <%= JSON.stringify(obj.request.headers, undefined, 2) %>
+                        </pre>
+                </div>
+
+                <button type="button" class="collapsible">
+                    Body:&nbsp;&nbsp;&nbsp;&nbsp;
+                    <i class="fas fa-chevron-down"></i>
+                </button>
+                <div id="request-details" class="content">
+                    <pre>
+                            <%= JSON.stringify(obj.request.body, undefined, 2) %>
+                        </pre>
+                </div>
+                <strong>RESPONSE</strong>
+
+                <button type="button" class="collapsible">
+                    Headers:&nbsp;&nbsp;&nbsp;&nbsp;
+                    <i class="fas fa-chevron-down"></i>
+                </button>
+                <div id="response-headers" class="content">
+                    <pre>
+                            <%= JSON.stringify(obj.response.headers, undefined, 2) %>
+                        </pre>
+                </div>
+                <button type="button" class="collapsible">
+                    Body:&nbsp;&nbsp;&nbsp;&nbsp;
+                    <i class="fas fa-chevron-down"></i>
+                </button>
+                <div id="response-details" class="content">
+                    <pre>
+                            <%= JSON.stringify(obj.response.body, undefined, 2) %>
+                        </pre>
+                </div>
+                <hr class="callDivider">
+                <br><br><br>
+                <% }) %>
 
 
-        <strong id="title-blob"></strong>
-
-        <div id="request-lite" class="aBox">
-        </div>
-
-        <strong>REQUEST</strong>
-
-
-        <button type="button" class="collapsible">
-            Headers:&nbsp;&nbsp;&nbsp;&nbsp;
-            <i class="fas fa-chevron-down"></i>
-        </button>
-
-        <div id="request-headers" class="content">
-        </div>
-
-
-        <button type="button" class="collapsible">
-            Body:&nbsp;&nbsp;&nbsp;&nbsp;
-            <i class="fas fa-chevron-down"></i>
-        </button>
-        <div id="request-details" class="content">
-        </div>
-
-        <strong>RESPONSE</strong>
-
-        <button type="button" class="collapsible">
-            Headers:&nbsp;&nbsp;&nbsp;&nbsp;
-            <i class="fas fa-chevron-down"></i>
-        </button>
-        <div id="response-headers" class="content">
-        </div>
-
-        <button type="button" class="collapsible">
-            Body:&nbsp;&nbsp;&nbsp;&nbsp;
-            <i class="fas fa-chevron-down"></i>
-        </button>
-        <div id="response-details" class="content">
-        </div>
-        <hr class="callDivider">
-        
     </div>
+
 </div>

@@ -27,8 +27,7 @@ fetch("/hello")
 
 
 
-        for (let [key, value]
-            of Object.entries(parsedDataOne.request)) {
+        for (let [key, value] of Object.entries(parsedDataOne.request)) {
             if (key === "body" || key === "headers") {
                 continue;
             }
