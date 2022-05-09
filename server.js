@@ -52,7 +52,7 @@ morgan.token('res-headers', (_req, res) =>
 
 
 /**
- * @description - set up the logger, write to the file in valid JSON format
+ * @description - set up the logger, write to the file in valid JSON
  */
 app.use(morgan(`{
 "GUID": ":id",
