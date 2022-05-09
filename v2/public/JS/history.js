@@ -2,13 +2,13 @@
  * @summary this file to bring in the blob data from the /hello route parse and display to front end
  */
 
-const historyContainer = document.getElementById("history-container");
-const titleBlob = document.getElementById("title-blob");
-const requestDetailContainer = document.getElementById("request-details");
-const requestLiteContainer = document.getElementById("request-lite");
-const requestHeadersContainer = document.getElementById("request-headers");
-const responseHeadersContainer = document.getElementById("response-headers");
-const responseDetailContainer = document.getElementById("response-details");
+// const historyContainer = document.getElementById("history-container");
+// const titleBlob = document.getElementById("title-blob");
+// const requestDetailContainer = document.getElementById("request-details");
+// const requestLiteContainer = document.getElementById("request-lite");
+// const requestHeadersContainer = document.getElementById("request-headers");
+// const responseHeadersContainer = document.getElementById("response-headers");
+// const responseDetailContainer = document.getElementById("response-details");
 
 //TODO will make this dynamic later, like to loop and display in order of history but for now lets just display the two of them for the mock but also ++ add pagination    
 // add it into ejs

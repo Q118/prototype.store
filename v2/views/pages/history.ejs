@@ -25,8 +25,11 @@
                 <div class="aBox">
                     <% const obj=JSON.parse(blob.data) %>
                         <%for (let [key, value] of Object.entries(obj.request)) { %>
-                            <% if (key==="headers" || key==="body" ) { %>
+                            <% if (key=== "headers" || key ==="body" ) { %>
                                 <% continue %>
+                                    <% } %>
+                            <% if (key === "startTime" || key === "endTime" ) { %>
+                                <% value = new Date(value).toLocaleString(); %>
                                     <% } %>
                                         <div id="request-lite">
                                             <%= key %> : <%= value %>
