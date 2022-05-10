@@ -1,5 +1,8 @@
 /**
  * @summary This file holds the logic to send the data to the storage account
+ * ! use a stream so its efficient. 
+ * stream in the data from the log file into azure, creating a new blob for each {} 
+ * and the title of each blob file to be the GUID.
  */
 
 const fs = require('fs')
@@ -10,7 +13,6 @@ require("dotenv").config();
 // const { streamToBuffer } = require("./v2/utils/stream");
 const Readable = require('stream').Readable;
 
-//! use a stream so its efficient. stream in the data from the log file into azure, creating a new blob for each {} and the title of each blob file to be the GUID.
 
 async function main(title, body) {
     const AZURE_STORAGE_CONNECTION_STRING =
