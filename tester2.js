@@ -8,11 +8,8 @@ require("dotenv").config();
 const { streamToBuffer } = require("./v2/utils/stream");
 const Readable = require('stream').Readable;
 
-//! use a stream so its efficient. stream in the data from the log file into azure, creating a new blob for each {} and the title of each blob file to be the GUID.
-
 async function main(title, body) {
-    console.log('Azure Blob storage v12 - JavaScript');
-
+    console.log('Azure Blob storage v12 - JavaScript quickstart sample');
 
     const AZURE_STORAGE_CONNECTION_STRING =
         process.env.AZURE_STORAGE_CONNECTION_STRING;
@@ -33,6 +30,12 @@ async function main(title, body) {
     // Get a reference to a container
     const containerClient = blobServiceClient.getContainerClient(containerName);
 
+    // Create the container
+    // const createContainerResponse = await containerClient.create();
+    // console.log(
+    //     "Container was created successfully. requestId: ",
+    //     createContainerResponse.requestId
+    // );
     const blobName = title;
 
     // Get a block blob client
@@ -40,7 +43,10 @@ async function main(title, body) {
 
     console.log("\nUploading to Azure storage as blob:\n\t", blobName);
 
+    // Upload data to the blob
+    // const data = "Hello, World!";
     const uploadBlobResponse = await blockBlobClient.uploadStream(body, body.length, { blobHTTPHeaders: { blobContentType: "application/json" } }); 
+
     console.log(
         "Blob was uploaded successfully. requestId: ",
         uploadBlobResponse.requestId
@@ -49,31 +55,6 @@ async function main(title, body) {
 
 }
 
-fileReadStream.on('data', (chunk) => {
-    let lines = chunk.toString().split('\n\n');
-
-    // loop through each line in lines. for each line, create a new blob with the GUID as the title and the body to hold the whole {}. insert these into azure storage
-    for (let i = 0; i < lines.length; i++) {
-        if (lines[i].length < 1) { // if the line is empty, skip it
-            console.log("skipping empty line " + i);
-            continue;
-        }
-        let bodyStr = lines[i].slice(0, -1) //remove trailing ',' to allow valid json
-
-        let lineObj = JSON.parse(bodyStr);
-
-        let guidTitle = lineObj.GUID;
-
-        const s = new Readable();
-        s._read = () => { };
-        s.push(bodyStr);
-        s.push(null);
-        main(guidTitle, s) 
-            .then(() => console.log('Done'))
-            .catch((ex) => console.log(ex.message));
-    }
-
-
-});
-
-
+main() // put this inside the event omitter
+    .then(() => console.log('Done'))
+    .catch((ex) => console.log(ex.message));
