@@ -1,3 +1,7 @@
+/**
+ * @summary this file handles the API request logging 
+ */
+
 var express = require('express')
 var fs = require('fs')
 var morgan = require('morgan')

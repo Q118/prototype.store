@@ -19,17 +19,14 @@
             <% console.log("@@" + typeof JSON.parse(blob.data)) %>
                 <h4>
                     <strong id="title-blob">
-                        <%= blob.name %>
+                        <%= blob.GUID %>
                     </strong>
                 </h4>
                 <div class="aBox">
-                    <% const obj=JSON.parse(blob.data) %>
-                        <%for (let [key, value] of Object.entries(obj.request)) { %>
-                            <% if (key=== "headers" || key ==="body" ) { %>
+                    <% const obj=JSON.parse(blob) %>
+                        <%for (let [key, value] of Object.entries(obj)) { %>
+                            <% if (key=== "REQUEST" || key ==="RESPONSE" ) { %>
                                 <% continue %>
-                                    <% } %>
-                            <% if (key === "startTime" || key === "endTime" ) { %>
-                                <% value = new Date(value).toLocaleString(); %>
                                     <% } %>
                                         <div id="request-lite">
                                             <%= key %> : <%= value %>

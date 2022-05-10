@@ -63,11 +63,16 @@ async function main() {
     console.log("Blobs:");
     let blobNames = [];
     let blobs = [];
+
+    //! throwing error from below 'The first argument must be of type string or an instance of Buffer, ArrayBuffer, or Array or an Array-like Object. Received undefined'
+    // do not understand because there are no args beiing passed to the method
     for await (const blob of containerClient.listBlobsFlat()) {
         console.log(`- ${blob.name}`);
         blobNames.push(blob.name);
     }
-
+    
+    //containerClient.listBlobsFlat();
+    //blobNames.push("api-requests.json");
 
 
     // grab the contents of inside each blob
@@ -84,11 +89,7 @@ async function main() {
 
 
     app.get('/blobs', (req, res) => {
-        // res.send(JSON.parse(JSON.stringify(blobs[0].data, undefined, 2)));
-        // res.send(JSON.parse(JSON.stringify(blobs)));
         res.send(blobs);
-
-        // TODO: send the whole blob array and parse from
     });
 
     /**

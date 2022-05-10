@@ -28,7 +28,7 @@ async function main(title, body) {
     console.log("\t", containerName);
     // Get a reference to a container
     const containerClient = blobServiceClient.getContainerClient(containerName);
-    const blobName = title;
+    const blobName = title + ".json";
     // Get a block blob client
     const blockBlobClient = containerClient.getBlockBlobClient(blobName);
     console.log("\nUploading to Azure storage as blob:\n\t", blobName);
