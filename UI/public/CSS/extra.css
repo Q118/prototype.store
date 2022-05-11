@@ -21,6 +21,7 @@
 .content {
     padding: 0 18px;
     display: none;
+    /* TODO change above to block */
     overflow: hidden;
     background-color: #f1f1f1;
 }
