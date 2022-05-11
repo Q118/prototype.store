@@ -32,7 +32,7 @@ async function main(title, body) {
     // Get a block blob client
     const blockBlobClient = containerClient.getBlockBlobClient(blobName);
     console.log("\nUploading to Azure storage as blob:\n\t", blobName);
-    const uploadBlobResponse = await blockBlobClient.uploadStream(body, body.length, { blobHTTPHeaders: { blobContentType: "application/json" } });
+    const uploadBlobResponse = await blockBlobClient.upload(body, body.length, { blobHTTPHeaders: { blobContentType: "application/json" } });
     console.log(
         "Blob was uploaded successfully. requestId: ",
         uploadBlobResponse.requestId
@@ -53,7 +53,7 @@ fileReadStream.on('data', (chunk) => {
         s._read = () => { };
         s.push(bodyStr);
         s.push(null);
-        main(guidTitle, s)
+        main(guidTitle, bodyStr)
             .then(() => console.log('Done'))
             .catch((ex) => console.log(ex.message));
     }
