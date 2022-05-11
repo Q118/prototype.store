@@ -20,7 +20,7 @@ app.set('layout extractScripts', true)
 app.set('layout extractStyles', true)
 
 /**
- * @summary Authentication
+ * @description Authentication
  */
 const { BlobServiceClient } = require("@azure/storage-blob");
 require("dotenv").config();
@@ -75,7 +75,7 @@ async function main() {
         const blobClient = containerClient.getBlobClient(blobNames[i]);
         const downloadBlockBlobResponse = await blobClient.download();
         const downloaded = await streamToBuffer(downloadBlockBlobResponse.readableStreamBody);
-        let newObj = { name: blobNames[i], data: downloaded.toString() };
+        let newObj = { name: blobNames[i].replace(".json", ""), data: downloaded.toString() };
         blobs.push(newObj);
     };
     console.log(blobs.length);
@@ -98,6 +98,7 @@ async function main() {
         });
     });
 }
+
 app.listen(3000, () => {
     console.log('webApp is running on port 3000');
 });

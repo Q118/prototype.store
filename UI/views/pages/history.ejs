@@ -15,23 +15,21 @@
 
     <div id="history-container" class="container">
         <% blobs.forEach(blob=> { %>
+            <% const obj=JSON.parse(blob.data) %>
             <h4>
                 <strong id="title-blob">
-                    <%= blob.name.replace(".json", "" ) %>
+                    <%= obj.Time %>
                 </strong>
             </h4>
-            <% /* Logic within below anchor for sharing permalink */ %>
+            <% /* Logic in below anchor for sharing permalink */ %>
                 <a id="ref-link-<%= blob.name %>">
                     <button type="button" class="btn btn-outline-primary float-right shareButton" data-toggle="tooltip"
-                        data-placement="top" title="Copy Permalink to Clipboard">
+                        data-placement="top" title="Copy Permalink of this request to Clipboard">
                         Share
                     </button>
                 </a>
 
                 <div class="aBox">
-
-                    <% const obj=JSON.parse(blob.data) %>
-
                         <%for (let [key, value] of Object.entries(obj)) { %>
                             <% if (key==="REQUEST" || key==="RESPONSE" ) { %>
                                 <% continue %>
@@ -85,7 +83,7 @@
                 </div>
                 <hr class="callDivider">
                 <br><br>
-                <% }) %>
+        <% }) %>
 
 
     </div>

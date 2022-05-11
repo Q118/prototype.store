@@ -62,7 +62,7 @@ morgan.token('res-headers', (_req, res) =>
 app.use(morgan(`{
 "GUID": ":id",
 "IP": ":remote-addr",
-"Time": ":date[clf]",
+"Time": ":date[iso]",
 "Method": ":method",
 "URL": ":url",  
 "Status": ":status",
