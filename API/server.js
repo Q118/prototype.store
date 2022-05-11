@@ -19,14 +19,14 @@ var accessLogStream = fs.createWriteStream(path.join(__dirname, 'access.log'), {
  * todo: unique variable names
  */
 const { v4: genId } = require('uuid');
-const assignId = (req, res, next) => {
+const assignRequestGUID = (req, res, next) => {
     req.id = genId();
     next()
 }
 morgan.token('id', getId = (req) => {
     return req.id
 })
-app.use(assignId)
+app.use(assignRequestGUID)
 
 
 /**

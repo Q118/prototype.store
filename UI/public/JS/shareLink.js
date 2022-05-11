@@ -9,7 +9,6 @@ for (let i = 0; i < shareButtons.length; i++) {
         let copyText = window.location.href; 
         let copyTextArr = copyText.split("#"); // here to account for case when user is on the page from a share and wants to create a new share
         copyText = copyTextArr[0] + "#" + shareButtons[i].parentElement.id;
-
         navigator.clipboard.writeText(copyText);
         console.log(`${copyText} Copied to clipboard`);
         shareButtons[i].innerHTML = "Copied to clipboard!";

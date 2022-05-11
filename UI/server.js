@@ -10,12 +10,10 @@ app.use(express.urlencoded({ extended: true }));
  * @summary View Engine set up  
  */
 console.log('Initializing the EJS view engine');
-// Define where the views are stored
-app.set('views', path.join(__dirname, 'views'));
+app.set('views', path.join(__dirname, 'views'));// Define where the views are stored
 app.set('view engine', 'ejs');
 app.use(expressEJSLayouts);
-app.set('layout', 'layouts/master');
-// ^This lets us have one, main structural page in /views/layouts/master.ejs
+app.set('layout', 'layouts/master');// This lets us have one, main structural page in /views/layouts/master.ejs
 app.set('layout extractScripts', true)
 app.set('layout extractStyles', true)
 
@@ -40,8 +38,6 @@ const { streamToBuffer } = require("./utils/stream");
 //await containerClient.delete();
 //console.log("deleted container");
 // #endregion
-
-
 
 
 /**
@@ -78,9 +74,9 @@ async function main() {
         let newObj = { name: blobNames[i].replace(".json", ""), data: downloaded.toString() };
         blobs.push(newObj);
     };
-    console.log(blobs.length);
-    console.log(blobs[0].data);
-    console.log(blobs[0].name);
+    console.log(`${blobs.length} blobs loaded`);
+    console.log(blobs[0].data); // debug
+    console.log(blobs[0].name); // debug
 
 
     app.get('/blobs', (req, res) => {
@@ -102,8 +98,6 @@ async function main() {
 app.listen(3000, () => {
     console.log('webApp is running on port 3000');
 });
-
-
 
 
 main().catch((error) => {
