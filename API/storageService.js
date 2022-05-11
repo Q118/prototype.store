@@ -11,7 +11,7 @@ const fileReadStream = fs.createReadStream(file);
 const { BlobServiceClient } = require("@azure/storage-blob");
 require("dotenv").config();
 // const { streamToBuffer } = require("./v2/utils/stream");
-const Readable = require('stream').Readable;
+// const Readable = require('stream').Readable;
 
 
 async function main(title, body) {

@@ -1,5 +1,5 @@
 const express = require('express');
-const expressLayouts = require('express-ejs-layouts');
+const expressEJSLayouts = require('express-ejs-layouts');
 const path = require('path');
 const app = express();
 app.use(express.static(path.join(__dirname, 'public')));
@@ -13,7 +13,7 @@ console.log('Initializing the EJS view engine');
 // Define where the views are stored
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
-app.use(expressLayouts);
+app.use(expressEJSLayouts);
 app.set('layout', 'layouts/master');
 // ^This lets us have one, main structural page in /views/layouts/master.ejs
 app.set('layout extractScripts', true)

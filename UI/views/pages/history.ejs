@@ -15,17 +15,25 @@
 
     <div id="history-container" class="container">
         <% blobs.forEach(blob=> { %>
+            <h4>
+                <strong id="title-blob">
+                    <%= blob.name.replace(".json", "" ) %>
+                </strong>
+            </h4>
+            <% /* Logic within below anchor for sharing permalink */ %>
+                <a id="ref-link-<%= blob.name.replace(" .json", "" ) %>">
+                    <button type="button" class="btn btn-outline-primary float-right shareButton" data-toggle="tooltip"
+                        data-placement="top" title="Copy Permalink to Clipboard">
+                        Share
+                    </button>
+                </a>
 
-            <% console.log("@@" + JSON.stringify(blob.GUID)) %>
-                <h4>
-                    <strong id="title-blob">
-                        <%= blob.name.replace(".json", "") %>
-                    </strong>
-                </h4>
                 <div class="aBox">
-                    <% const obj= JSON.parse(blob.data) %>
+
+                    <% const obj=JSON.parse(blob.data) %>
+
                         <%for (let [key, value] of Object.entries(obj)) { %>
-                            <% if (key=== "REQUEST" || key ==="RESPONSE") { %>
+                            <% if (key==="REQUEST" || key==="RESPONSE" ) { %>
                                 <% continue %>
                                     <% } %>
                                         <div id="request-lite">
@@ -76,7 +84,7 @@
                         </pre>
                 </div>
                 <hr class="callDivider">
-                <br><br><br>
+                <br><br>
                 <% }) %>
 
 

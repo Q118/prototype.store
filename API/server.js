@@ -16,6 +16,7 @@ var accessLogStream = fs.createWriteStream(path.join(__dirname, 'access.log'), {
 
 /**
  * @description - set up the guid
+ * todo: unique variable names
  */
 const { v4: genId } = require('uuid');
 const assignId = (req, res, next) => {
