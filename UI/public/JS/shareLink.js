@@ -10,7 +10,7 @@ for (let i = 0; i < shareButtons.length; i++) {
     shareButtons[i].addEventListener("click", () => {
 
         let copyText = window.location.href + "#" + shareButtons[i].parentElement.id;
-        copyText = copyText.replace(".json", "");
+        
         
         navigator.clipboard.writeText(copyText);
 
