@@ -16,16 +16,16 @@
     <div id="history-container" class="container">
         <% blobs.forEach(blob=> { %>
 
-            <% console.log("@@" + typeof JSON.parse(blob.data)) %>
+            <% console.log("@@" + JSON.stringify(blob.GUID)) %>
                 <h4>
                     <strong id="title-blob">
-                        <%= blob.GUID %>
+                        <%= blob.name.replace(".json", "") %>
                     </strong>
                 </h4>
                 <div class="aBox">
-                    <% const obj=JSON.parse(blob) %>
+                    <% const obj= JSON.parse(blob.data) %>
                         <%for (let [key, value] of Object.entries(obj)) { %>
-                            <% if (key=== "REQUEST" || key ==="RESPONSE" ) { %>
+                            <% if (key=== "REQUEST" || key ==="RESPONSE") { %>
                                 <% continue %>
                                     <% } %>
                                         <div id="request-lite">
@@ -42,7 +42,7 @@
 
                 <div id="request-headers" class="content">
                     <pre>
-                            <%= JSON.stringify(obj.request.headers, undefined, 2) %>
+                            <%= JSON.stringify(obj.REQUEST.Headers, undefined, 2) %>
                         </pre>
                 </div>
 
@@ -52,7 +52,7 @@
                 </button>
                 <div id="request-details" class="content">
                     <pre>
-                            <%= JSON.stringify(obj.request.body, undefined, 2) %>
+                            <%= JSON.stringify(obj.REQUEST.Body, undefined, 2) %>
                         </pre>
                 </div>
                 <strong>RESPONSE</strong>
@@ -63,7 +63,7 @@
                 </button>
                 <div id="response-headers" class="content">
                     <pre>
-                            <%= JSON.stringify(obj.response.headers, undefined, 2) %>
+                            <%= JSON.stringify(obj.RESPONSE.Headers, undefined, 2) %>
                         </pre>
                 </div>
                 <button type="button" class="collapsible">
@@ -72,7 +72,7 @@
                 </button>
                 <div id="response-details" class="content">
                     <pre>
-                            <%= JSON.stringify(obj.response.body, undefined, 2) %>
+                            <%= JSON.stringify(obj.RESPONSE.Body, undefined, 2) %>
                         </pre>
                 </div>
                 <hr class="callDivider">

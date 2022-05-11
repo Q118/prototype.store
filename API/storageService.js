@@ -49,10 +49,10 @@ fileReadStream.on('data', (chunk) => {
         let bodyStr = lines[i].slice(0, -1) //remove trailing ',' 
         let lineObj = JSON.parse(bodyStr);
         let guidTitle = lineObj.GUID;
-        const s = new Readable();
-        s._read = () => { };
-        s.push(bodyStr);
-        s.push(null);
+        // const s = new Readable();
+        // s._read = () => { };
+        // s.push(bodyStr);
+        // s.push(null);
         main(guidTitle, bodyStr)
             .then(() => console.log('Done'))
             .catch((ex) => console.log(ex.message));

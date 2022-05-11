@@ -54,26 +54,21 @@ async function main() {
 
     let i = 1;
     // lists all containers to console
+    let containerName = "";
     for await (const container of blobServiceClient.listContainers()) {
         console.log(`Container ${i++}: ${container.name}`);
+        containerName = container.name;
     }
 
-    const containerClient = blobServiceClient.getContainerClient("apirequests");
+    const containerClient = blobServiceClient.getContainerClient(containerName);
     // Iterate over all blobs in the container
     console.log("Blobs:");
     let blobNames = [];
     let blobs = [];
-
-    //! throwing error from below 'The first argument must be of type string or an instance of Buffer, ArrayBuffer, or Array or an Array-like Object. Received undefined'
-    // do not understand because there are no args beiing passed to the method
     for await (const blob of containerClient.listBlobsFlat()) {
         console.log(`- ${blob.name}`);
         blobNames.push(blob.name);
     }
-    
-    //containerClient.listBlobsFlat();
-    //blobNames.push("api-requests.json");
-
 
     // grab the contents of inside each blob
     for (let i = 0; i < blobNames.length; i++) {
@@ -102,13 +97,13 @@ async function main() {
             title: "Compliance Rules Workbench"
         });
     });
-
-    app.listen(3000, () => {
-        console.log('webApp is running on port 3000');
-    });
-
-
 }
+app.listen(3000, () => {
+    console.log('webApp is running on port 3000');
+});
+
+
+
 
 main().catch((error) => {
     console.error(error);
