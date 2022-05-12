@@ -1,2 +1,29 @@
 <% /* This file to hold the searching, tokenizing, etc for the user to be able to look up a specific request based on a few options for input params(same as columns maybe in azure storage) by rule, by date, URL...  */ %>
-<input type="text" id="search" class="form-control float" placeholder="Search...">
+
+<% /* Drop down next to the input on the left to choose search term */ %>
+<!-- <input type="text" id="search" class="form-control float" placeholder="Search..."> -->
+
+
+
+<form id="searchForm" class="container" action="" method="get">
+  <div class="form-group row">
+    <label class="col-sm-2 col-md-1 form-control-sm" for="searchOn">Search</label>
+    <div class="col-sm-2 col-md-3">
+      <input id="sortColumnNameField" name="sortColumnName" type="hidden" class="form-control" value="">
+      <input id="sortDirectionField" name="sortDirection" type="hidden" class="form-control" value="">
+      <input id="pageField" name="page" type="hidden" class="form-control" value="">
+      <input id="pageSizeField" name="pageSize" type="hidden" class="form-control" value="">
+      <select id="searchColumnNameField" name="searchColumnName" class="form-control form-control-sm">
+        <option value="Time">GUID</option>
+        <option value="URL">URL</option>
+        <option value="Method">Method</option>
+        <option value="StatusCode">StatusCode</option>
+      </select>
+    </div>
+    <div class="col-sm-8 col-md-8">
+      <input id="searchValueField" name="searchValue" type="text" class="form-control form-control-sm" placeholder="Enter search value" value="">
+      <button id="clearBtn" type="button" class="btn btn-secondary btn-sm float-right mt-2"><span class="fas fa-eraser"></span>&nbsp;Clear</button>
+      <button id="searchBtn" type="button" class="btn btn-secondary btn-sm float-right mt-2 mr-2"><span class="fas fa-search"></span>&nbsp;Search</button>
+    </div>
+  </div>
+</form>

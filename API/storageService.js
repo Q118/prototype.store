@@ -47,7 +47,12 @@ fileReadStream.on('data', (chunk) => {
             continue;
         }
         let bodyStr = lines[i].slice(0, -1) //remove trailing ',' 
+        
         let lineObj = JSON.parse(bodyStr);
+        
+        //console.log(`${bodyStr} \n@\n\n`)
+        
+        
         let guidTitle = lineObj.GUID;
         // const s = new Readable();
         // s._read = () => { };
