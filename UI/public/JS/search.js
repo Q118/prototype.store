@@ -1,21 +1,34 @@
 console.log("Sanity now");
 
-//TODO can delete the search/clear buttons as the results are rendered by input
 
 const searchInput = document.getElementById("blobSearchValue");
 const searchParam = document.getElementById("blobSearchParam");
-
+const clearButton = document.getElementById("clearBlobBtn");
 let blobs = [];
 
 const searchBlobs = (e) => {
     const text = e.target.value.toLowerCase();
-
-
-    console.log(searchParam.value)
-
+    const searchValue = searchParam.value.toLowerCase();
+    console.log(searchValue) // debug
     document.querySelectorAll(".blob-wrapper").forEach((blob) => {
-        const blobName = blob.querySelector("#title-blob").innerText;
-        if (blobName.toLowerCase().indexOf(text) != -1) {
+        // TODO add search by RULE (or request-keyword)
+        // also there is a more dynamic way to do this i know
+        let blobIdentifier;
+        
+        if (searchValue === "guid") {
+            blobIdentifier = blob.querySelector(".blob-guid-wrapper").innerText;
+        } else if (searchValue === "url") {
+            blobIdentifier = blob.querySelector(".blob-url-wrapper").innerText;
+        } else if (searchValue === "method") {
+            blobIdentifier = blob.querySelector(".blob-method-wrapper").innerText;
+        } else if (searchValue === "statuscode") {
+            blobIdentifier = blob.querySelector(".blob-status-wrapper").innerText;
+        } else {
+            console.log("Something went wrong grabbing a param to search");
+        }
+
+        if (blobIdentifier.toLowerCase().indexOf(text) != -1) {
+            console.log("got here?") // debug
             blob.style.display = "block";
         } else {
             blob.style.display = "none";
@@ -25,3 +38,7 @@ const searchBlobs = (e) => {
 
 searchInput.addEventListener("keyup", searchBlobs);
 
+clearButton.addEventListener("click", () => {
+    searchInput.value = "";
+    searchBlobs({ target: searchInput });
+});

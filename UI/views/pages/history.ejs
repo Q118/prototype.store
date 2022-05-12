@@ -32,14 +32,17 @@
       </a>
 
       <div class="aBox">
-        <%for (let [key, value] of Object.entries(obj)) { %>
-        <% if (key==="REQUEST" || key==="RESPONSE" ) { %>
-        <% continue %>
-        <% } %>
+
         <div id="request-lite">
-          <%= key %> : <%= value %>
+          <div class="blob-guid-wrapper">GUID: <%= obj.GUID %></div>
+          <div class="blob-ip-wrapper">IP: <%= obj.IP %></div>
+          <div class="blob-method-wrapper">Method: <%= obj.Method %></div>
+          <div class="blob-url-wrapper">URL: <%= obj.URL %></div>
+          <div class="blob-status-wrapper">Status: <%= obj.Status %></div>
+          <div class="blob-contentLength-wrapper">Content-Length: <%= obj['Content-Length'] %></div>
+          <div class="blob-elapsedTime-wrapper">Elapsed-Time: <%= obj['Elapsed-Time'] %></div>
         </div>
-        <% } %>
+
       </div>
       <strong>REQUEST</strong>
 
@@ -50,8 +53,8 @@
 
       <div id="request-headers" class="content">
         <pre>
-                            <%= JSON.stringify(obj.REQUEST.Headers, undefined, 2) %>
-                        </pre>
+            <%= JSON.stringify(obj.REQUEST.Headers, undefined, 2) %>
+        </pre>
       </div>
 
       <button type="button" class="collapsible">
@@ -60,8 +63,8 @@
       </button>
       <div id="request-details" class="content">
         <pre>
-                            <%= JSON.stringify(obj.REQUEST.Body, undefined, 2) %>
-                        </pre>
+            <%= JSON.stringify(obj.REQUEST.Body, undefined, 2) %>
+        </pre>
       </div>
       <strong>RESPONSE</strong>
 
