@@ -1,93 +1,94 @@
 <div class="col-sm-9 col-md-10 p-3">
-    <div class="container-fluid">
-        <div class="row">
-            <div class="col">
-                <h1><i class="fas fa-cloud-upload-alt"></i>&nbsp;Triage - API Requests</h1>
-                <hr>
-            </div>
-        </div>
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col">
+        <h1><i class="fas fa-cloud-upload-alt"></i>&nbsp;Triage - API Requests</h1>
+        <hr>
+      </div>
     </div>
-    <h4>
-        <i class="fas fa-history"></i>&nbsp;History
-    </h4>
+  </div>
+  <h4>
+    <i class="fas fa-history"></i>&nbsp;History
+  </h4>
 
-    <%- include('../includes/search') %>
+  <%- include('../includes/search') %>
 
 
 
-    <div id="history-container" class="container">
-        <% blobs.forEach(blob=> { %>
-            <% const obj=JSON.parse(blob.data) %>
-            <h4>
-                <strong id="title-blob">
-                    <%= obj.Time %>
-                </strong>
-            </h4>
-            <% /* Logic in below anchor for sharing permalink */ %>
-                <a id="ref-link-<%= blob.name %>">
-                    <button type="button" class="btn btn-outline-primary float-right shareButton" data-toggle="tooltip"
-                        data-placement="top" title="Copy Permalink of this request to Clipboard">
-                        Share
-                    </button>
-                </a>
+  <div id="history-container" class="container">
+    <% blobs.forEach(blob=> { %>
+    <% const obj=JSON.parse(blob.data) %>
+    <div class="blob-wrapper">
+      <h4>
+        <strong id="title-blob">
+          <%= obj.Time %>
+        </strong>
+      </h4>
+      <% /* Logic in below anchor for sharing permalink */ %>
+      <a id="ref-link-<%= blob.name %>">
+        <button type="button" class="btn btn-outline-primary float-right shareButton" data-toggle="tooltip" data-placement="top" title="Copy Permalink of this request to Clipboard">
+          Share
+        </button>
+      </a>
 
-                <div class="aBox">
-                        <%for (let [key, value] of Object.entries(obj)) { %>
-                            <% if (key==="REQUEST" || key==="RESPONSE" ) { %>
-                                <% continue %>
-                                    <% } %>
-                                        <div id="request-lite">
-                                            <%= key %> : <%= value %>
-                                        </div>
-                                        <% } %>
-                </div>
-                <strong>REQUEST</strong>
+      <div class="aBox">
+        <%for (let [key, value] of Object.entries(obj)) { %>
+        <% if (key==="REQUEST" || key==="RESPONSE" ) { %>
+        <% continue %>
+        <% } %>
+        <div id="request-lite">
+          <%= key %> : <%= value %>
+        </div>
+        <% } %>
+      </div>
+      <strong>REQUEST</strong>
 
-                <button type="button" class="collapsible">
-                    Headers:&nbsp;&nbsp;&nbsp;&nbsp;
-                    <i class="fas fa-chevron-down"></i>
-                </button>
+      <button type="button" class="collapsible">
+        Headers:&nbsp;&nbsp;&nbsp;&nbsp;
+        <i class="fas fa-chevron-down"></i>
+      </button>
 
-                <div id="request-headers" class="content">
-                    <pre>
+      <div id="request-headers" class="content">
+        <pre>
                             <%= JSON.stringify(obj.REQUEST.Headers, undefined, 2) %>
                         </pre>
-                </div>
+      </div>
 
-                <button type="button" class="collapsible">
-                    Body:&nbsp;&nbsp;&nbsp;&nbsp;
-                    <i class="fas fa-chevron-down"></i>
-                </button>
-                <div id="request-details" class="content">
-                    <pre>
+      <button type="button" class="collapsible">
+        Body:&nbsp;&nbsp;&nbsp;&nbsp;
+        <i class="fas fa-chevron-down"></i>
+      </button>
+      <div id="request-details" class="content">
+        <pre>
                             <%= JSON.stringify(obj.REQUEST.Body, undefined, 2) %>
                         </pre>
-                </div>
-                <strong>RESPONSE</strong>
+      </div>
+      <strong>RESPONSE</strong>
 
-                <button type="button" class="collapsible">
-                    Headers:&nbsp;&nbsp;&nbsp;&nbsp;
-                    <i class="fas fa-chevron-down"></i>
-                </button>
-                <div id="response-headers" class="content">
-                    <pre>
+      <button type="button" class="collapsible">
+        Headers:&nbsp;&nbsp;&nbsp;&nbsp;
+        <i class="fas fa-chevron-down"></i>
+      </button>
+      <div id="response-headers" class="content">
+        <pre>
                             <%= JSON.stringify(obj.RESPONSE.Headers, undefined, 2) %>
                         </pre>
-                </div>
-                <button type="button" class="collapsible">
-                    Body:&nbsp;&nbsp;&nbsp;&nbsp;
-                    <i class="fas fa-chevron-down"></i>
-                </button>
-                <div id="response-details" class="content">
-                    <pre>
+      </div>
+      <button type="button" class="collapsible">
+        Body:&nbsp;&nbsp;&nbsp;&nbsp;
+        <i class="fas fa-chevron-down"></i>
+      </button>
+      <div id="response-details" class="content">
+        <pre>
                             <%= JSON.stringify(obj.RESPONSE.Body, undefined, 2) %>
                         </pre>
-                </div>
-                <hr class="callDivider">
-                <br><br>
-        <% }) %>
-
-
+      </div>
+      <hr class="callDivider">
     </div>
+    <br><br>
+    <% }) %>
+
+
+  </div>
 
 </div>
