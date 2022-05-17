@@ -22,7 +22,6 @@ const searchBlobs = (e) => {
 
         if (blobIdentifier?.toLowerCase().indexOf(text) != -1) { // -1 = not found ;-)
             blob.style.display = "block";
-           // blobIdentifier?.style.backgroundColor = "yellow";
         } else {
             blob.style.display = "none";
         }

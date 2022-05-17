@@ -6,10 +6,10 @@ for (i = 0; i < coll.length; i++) {
         this.classList.toggle("active");
         let content = this.nextElementSibling;
         // console.log(this.children) // debug
-        if (content.style.display === "block") {
-            content.style.display = "none";
-        } else {
+        if (content.style.display === "none") {
             content.style.display = "block";
+        } else {
+            content.style.display = "none";
         }
     });
 }
