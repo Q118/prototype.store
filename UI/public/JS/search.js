@@ -17,12 +17,14 @@ const searchBlobs = (e) => {
             case "statuscode": blobIdentifier = blob.querySelector(".blob-status-wrapper").innerText; break;
             case "reqkeyword": blobIdentifier = blob.querySelector("#blob-request-body").innerText; break;
             case "reskeyword": blobIdentifier = blob.querySelector("#blob-response-body").innerText; break;
-            default: console.log("Something went wrong grabbing a param to search");
+            default: console.log("Something went wrong capturing a param to search");
         }
 
         if (blobIdentifier?.toLowerCase().indexOf(text) != -1) { // -1 = not found ;-)
             blob.style.display = "block";
+            // blob.style.visibility = "visible";
         } else {
+            // blob.style.visibility = "hidden";
             blob.style.display = "none";
         }
     });
