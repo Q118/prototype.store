@@ -7,7 +7,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 /**
- * @summary View Engine set up  
+ * @description View Engine set up  
  */
 console.log('Initializing the EJS view engine');
 app.set('views', path.join(__dirname, 'views'));// Define where the views are stored
@@ -23,21 +23,6 @@ app.set('layout extractStyles', true)
 const { BlobServiceClient } = require("@azure/storage-blob");
 require("dotenv").config();
 const { streamToBuffer } = require("./utils/stream");
-
-
-
-/**
- * @summary create and then delete a container 
- * */
-// #region
-//    const containerName = `newcontainer${new Date().getTime()}`;
-//    const containerClient = blobServiceClient.getContainerClient(containerName);
-//    const createContainerResponse = await containerClient.create();
-//    console.log(`Create container ${containerName} successfully`, createContainerResponse.requestId); 
-//! Delete container
-//await containerClient.delete();
-//console.log("deleted container");
-// #endregion
 
 
 /**
@@ -78,10 +63,6 @@ async function main() {
     console.log(blobs[0].data); // debug
     console.log(blobs[0].name); // debug
 
-
-    app.get('/blobs', (req, res) => {
-        res.send(blobs);
-    });
 
     /**
      * @summary Routes
