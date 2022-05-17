@@ -26,12 +26,15 @@ async function main(title, body) {
     const containerName = "apirequests";
     console.log("\nFetching container...");
     console.log("\t", containerName);
+
     // Get a reference to a container
     const containerClient = blobServiceClient.getContainerClient(containerName);
     const blobName = title + ".json";
+    
     // Get a block blob client
     const blockBlobClient = containerClient.getBlockBlobClient(blobName);
     console.log("\nUploading to Azure storage as blob:\n\t", blobName);
+    
     const uploadBlobResponse = await blockBlobClient.upload(body, body.length, { blobHTTPHeaders: { blobContentType: "application/json" } });
     console.log(
         "Blob was uploaded successfully. requestId: ",
@@ -41,18 +44,13 @@ async function main(title, body) {
 
 fileReadStream.on('data', (chunk) => {
     let lines = chunk.toString().split('\n\n');
-    // loop through each line in lines. for each line, create a new blob with the GUID as the title and the body to hold the whole {}. insert these into azure storage
+    // for each line, create a new blob with the GUID as the title and the body to hold the whole {} and insert these into azure storage
     for (let i = 0; i < lines.length; i++) {
         if (lines[i].length < 1) { // skip the empty one
             continue;
         }
         let bodyStr = lines[i].slice(0, -1) //remove trailing ',' 
-        
         let lineObj = JSON.parse(bodyStr);
-        
-        //console.log(`${bodyStr} \n@\n\n`)
-        
-        
         let guidTitle = lineObj.GUID;
         // const s = new Readable();
         // s._read = () => { };

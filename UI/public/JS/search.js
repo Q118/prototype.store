@@ -28,7 +28,6 @@ const searchBlobs = (e) => {
         }
 
         if (blobIdentifier.toLowerCase().indexOf(text) != -1) {
-            console.log("got here?") // debug
             blob.style.display = "block";
         } else {
             blob.style.display = "none";
