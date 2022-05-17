@@ -61,7 +61,8 @@
         Body:&nbsp;&nbsp;&nbsp;&nbsp;
         <i class="fas fa-chevron-down"></i>
       </button>
-      <div id="request-details" class="content">
+
+      <div id="blob-request-body" class="content">
         <pre>
             <%= JSON.stringify(obj.REQUEST.Body, undefined, 2) %>
         </pre>
@@ -72,19 +73,20 @@
         Headers:&nbsp;&nbsp;&nbsp;&nbsp;
         <i class="fas fa-chevron-down"></i>
       </button>
+
       <div id="response-headers" class="content">
         <pre>
-                            <%= JSON.stringify(obj.RESPONSE.Headers, undefined, 2) %>
-                        </pre>
+            <%= JSON.stringify(obj.RESPONSE.Headers, undefined, 2) %>
+        </pre>
       </div>
       <button type="button" class="collapsible">
         Body:&nbsp;&nbsp;&nbsp;&nbsp;
         <i class="fas fa-chevron-down"></i>
       </button>
-      <div id="response-details" class="content">
+      <div id="blob-response-body" class="content">
         <pre>
-                            <%= JSON.stringify(obj.RESPONSE.Body, undefined, 2) %>
-                        </pre>
+            <%= JSON.stringify(obj.RESPONSE.Body, undefined, 2) %>
+        </pre>
       </div>
       <hr class="callDivider">
     </div>
