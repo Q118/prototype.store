@@ -10,7 +10,7 @@ const searchBlobs = (e) => {
     document.querySelectorAll(".blob-wrapper").forEach((blob) => {
         //? there is a more dynamic way to do this.
         let blobIdentifier;
-        switch(searchValue) {
+        switch (searchValue) {
             case "guid": blobIdentifier = blob.querySelector(".blob-guid-wrapper").innerText; break;
             case "url": blobIdentifier = blob.querySelector(".blob-url-wrapper").innerText; break;
             case "method": blobIdentifier = blob.querySelector(".blob-method-wrapper").innerText; break;
@@ -20,13 +20,16 @@ const searchBlobs = (e) => {
             default: console.log("Something went wrong capturing a param to search");
         }
 
+        let title = blob.querySelector("#title-blob")
+
         if (blobIdentifier?.toLowerCase().indexOf(text) != -1) { // -1 = not found ;-)
             blob.style.display = "block";
-            // blob.style.visibility = "visible";
+            title.classList.toggle("found-blob");
         } else {
-            // blob.style.visibility = "hidden";
+            title.classList.toggle("found-blob");
             blob.style.display = "none";
         }
+
     });
 }
 
