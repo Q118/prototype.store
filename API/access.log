@@ -1,0 +1,867 @@
+{
+"GUID": "877fc740-05d7-41e9-8576-fd776a84598b",
+"IP": "216.2.246.66",
+"Time": "2022-05-11T20:01:45.168Z",
+"Method": "POST",
+"URL": "/v1/rules/evaluate",  
+"Status": "404",
+"Content-Length": "139",
+"Elapsed-Time": "7 ms",
+"REQUEST": { 
+"Headers": {"host":"localhost:3000","connection":"keep-alive","sec-ch-ua":"\" Not A;Brand\";v=\"99\", \"Chromium\";v=\"101\", \"Google Chrome\";v=\"101\"","sec-ch-ua-mobile":"?0","sec-ch-ua-platform":"\"Windows\"","upgrade-insecure-requests":"1","user-agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/101.0.4951.54 Safari/537.36","accept":"text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9","purpose":"prefetch","sec-fetch-site":"none","sec-fetch-mode":"navigate","sec-fetch-user":"?1","sec-fetch-dest":"document","accept-encoding":"gzip, deflate, br","accept-language":"en-US,en;q=0.9","cookie":"connect.sid=s%3A4Lz1-fQLGFDiYd_nKxvmdjuOJe4vb73u.H7lReZj1UjtsCd926W8d73LW7z11HNAg6s7Qj2B2b3w","if-none-match":"W/\"177aa-5jYCcUunidBeLUeZkUzzxAyFmZI\""}, 
+"Body": {
+    "data": [
+        {
+            "type": "evaluationData",
+            "attributes": {
+                "lineItem": {
+                    "name": "entry1",
+                    "lineItemDescription": "2022-03-05T00:00:00.000Z"
+                }
+            }
+        },
+        {
+            "type": "rule",
+            "attributes": {
+                "expression": "length(@lineItem.lineItemDescription) > 0"
+            }
+        }
+    ]
+}
+}, 
+"RESPONSE": { 
+"Headers": {"x-powered-by":"Express","content-security-policy":"default-src 'none'","x-content-type-options":"nosniff","content-type":"text/html; charset=utf-8","content-length":139}, 
+"Body": {
+    "data": {
+        "type": "evaluationResult",
+        "attributes": {
+            "evaluationStatus": "success",
+            "rule": {
+                "input": "length(@lineItem.lineItemDescription) > 0",
+                "output": true,
+                "evaluatedRule": {
+                    "type": "relationalExpression",
+                    "relation": "greaterThan",
+                    "leftOperand": {
+                        "type": "simpleStringFunction",
+                        "name": "length",
+                        "expression": {
+                            "type": "fieldIdentifier",
+                            "objectName": "lineItem",
+                            "fieldPath": [
+                                "lineItemDescription"
+                            ],
+                            "lookUpStatus": "found",
+                            "value": "2022-03-05T00:00:00.000Z",
+                            "computedValue": "2022-03-05T00:00:00.000Z"
+                        },
+                        "computedValue": 24
+                    },
+                    "rightOperand": {
+                        "type": "numberConstant",
+                        "value": 0,
+                        "computedValue": 0
+                    },
+                    "computedValue": true
+                }
+            }
+        }
+    }
+}
+}
+},
+
+{
+"GUID": "5b527a42-1588-441f-909a-86ff4ee00998",
+"IP": "216.2.246.66",
+"Time": "2022-05-11T20:02:04.927Z",
+"Method": "POST",
+"URL": "/v1/rules/evaluate",  
+"Status": "200",
+"Content-Length": "30",
+"Elapsed-Time": "690 ms",
+"REQUEST": { 
+"Headers": {"host":"localhost:3000","connection":"keep-alive","sec-ch-ua":"\" Not A;Brand\";v=\"99\", \"Chromium\";v=\"101\", \"Google Chrome\";v=\"101\"","sec-ch-ua-mobile":"?0","sec-ch-ua-platform":"\"Windows\"","upgrade-insecure-requests":"1","user-agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/101.0.4951.54 Safari/537.36","accept":"text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9","sec-fetch-site":"none","sec-fetch-mode":"navigate","sec-fetch-user":"?1","sec-fetch-dest":"document","accept-encoding":"gzip, deflate, br","accept-language":"en-US,en;q=0.9","cookie":"connect.sid=s%3A4Lz1-fQLGFDiYd_nKxvmdjuOJe4vb73u.H7lReZj1UjtsCd926W8d73LW7z11HNAg6s7Qj2B2b3w"}, 
+"Body": {
+    "data": [
+        {
+            "type": "evaluationData",
+            "attributes": {
+                "timeEntry": {
+                    "name": "entry1",
+                    "transactionDate": "2022-03-05T00:00:00.000Z"
+                }
+            }
+        },
+        {
+            "type": "rule",
+            "attributes": {
+                "expression": "dateDiff(days, @timeEntry.transactionDate, today()) > 30"
+            }
+        }
+    ]
+}
+}, 
+"RESPONSE": { 
+"Headers": {"x-powered-by":"Express","content-type":"application/json; charset=utf-8","content-length":"30","etag":"W/\"1e-byVly8ZDUbqpKnOKX9IN5M7Ygic\""}, 
+"Body": {
+    "data": {
+        "type": "evaluationResult",
+        "attributes": {
+            "evaluationStatus": "success",
+            "rule": {
+                "input": "dateDiff(days, @timeEntry.transactionDate, today()) > 30",
+                "output": true,
+                "evaluatedRule": {
+                    "type": "relationalExpression",
+                    "relation": "greaterThan",
+                    "leftOperand": {
+                        "type": "dateDiffFunction",
+                        "interval": "days",
+                        "start": {
+                            "type": "fieldIdentifier",
+                            "objectName": "timeEntry",
+                            "fieldPath": [
+                                "transactionDate"
+                            ],
+                            "lookUpStatus": "found",
+                            "value": "2022-03-05T00:00:00.000Z",
+                            "computedValue": "2022-03-05T00:00:00.000Z"
+                        },
+                        "end": {
+                            "type": "todayFunction",
+                            "computedValue": 1652368387313
+                        },
+                        "computedValue": 68.63411241898149
+                    },
+                    "rightOperand": {
+                        "type": "numberConstant",
+                        "value": 30,
+                        "computedValue": 30
+                    },
+                    "computedValue": true
+                }
+            }
+        }
+    }
+}
+}
+},
+
+{
+"GUID": "dc32828b-4f65-4382-8e4c-4f265d24fe85",
+"IP": "216.2.246.66",
+"Time": "2022-05-11T20:02:11.841Z",
+"Method": "GET",
+"URL": "/v1/eav?sortColumnName=Entity&sortDirection=ASC&searchColumnName=Attribute&searchValue=USD",  
+"Status": "200",
+"Content-Length": "30",
+"Elapsed-Time": "317 ms",
+"REQUEST": { 
+"Headers": {"host":"localhost:3000","connection":"keep-alive","sec-ch-ua":"\" Not A;Brand\";v=\"99\", \"Chromium\";v=\"101\", \"Google Chrome\";v=\"101\"","sec-ch-ua-mobile":"?0","sec-ch-ua-platform":"\"Windows\"","upgrade-insecure-requests":"1","user-agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/101.0.4951.54 Safari/537.36","accept":"text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9","sec-fetch-site":"none","sec-fetch-mode":"navigate","sec-fetch-user":"?1","sec-fetch-dest":"document","accept-encoding":"gzip, deflate, br","accept-language":"en-US,en;q=0.9","cookie":"connect.sid=s%3A4Lz1-fQLGFDiYd_nKxvmdjuOJe4vb73u.H7lReZj1UjtsCd926W8d73LW7z11HNAg6s7Qj2B2b3w"}, 
+"Body": {}
+}, 
+"RESPONSE": { 
+"Headers": {"x-powered-by":"Express","content-type":"application/json; charset=utf-8","content-length":"30","etag":"W/\"1e-byVly8ZDUbqpKnOKX9IN5M7Ygic\""}, 
+"Body": {
+    "links": {
+        "self": "https://aderantcompliance-us-dev-api.azurewebsites.net/eav?sortColumnName=Entity&sortDirection=ASC&searchColumnName=Attribute&searchValue=USD"
+    },
+    "data": [
+        {
+            "type": "eav",
+            "id": {
+                "entity": "Currency",
+                "attribute": "USD"
+            },
+            "attributes": {
+                "entity": "Currency",
+                "attribute": "USD",
+                "value": "U.S. Dollar",
+                "created": "2022-05-11T08:31:27.633Z",
+                "createdBy": "ADERANT_AP\\service.expert.qa"
+            },
+            "links": {
+                "self": "https://aderantcompliance-us-dev-api.azurewebsites.net/eav?entity=Currency&attribute=USD"
+            }
+        },
+        {
+            "type": "eav",
+            "id": {
+                "entity": "Matter",
+                "attribute": "BCACR.USD"
+            },
+            "attributes": {
+                "entity": "Matter",
+                "attribute": "BCACR.USD",
+                "value": "United States",
+                "created": "2022-03-23T03:01:22.417Z",
+                "createdBy": "ADERANT_AP\\wen.liu"
+            },
+            "links": {
+                "self": "https://aderantcompliance-us-dev-api.azurewebsites.net/eav?entity=Matter&attribute=BCACR.USD"
+            }
+        },
+        {
+            "type": "eav",
+            "id": {
+                "entity": "Matter",
+                "attribute": "USD"
+            },
+            "attributes": {
+                "entity": "Matter",
+                "attribute": "USD",
+                "value": "United States",
+                "created": "2022-04-20T20:17:20.187Z",
+                "createdBy": "ADERANT_AP\\service.expert.qa"
+            },
+            "links": {
+                "self": "https://aderantcompliance-us-dev-api.azurewebsites.net/eav?entity=Matter&attribute=USD"
+            }
+        }
+    ],
+    "meta": {
+        "page": 1,
+        "sortColumnName": "Entity",
+        "sortDirection": "ASC",
+        "searchColumnName": "Attribute",
+        "searchValue": "USD",
+        "totalRows": 3
+    }
+}
+}
+},
+
+{
+"GUID": "9904f7d8-6d3f-4a80-9e0c-d08eb35c4554",
+"IP": "216.2.246.66",
+"Time": "2022-05-11T20:03:15.871Z",
+"Method": "POST",
+"URL": "/v1/rules/evaluate/81d90f97-6ef1-4068-8a90-0ce7c2e48514",  
+"Status": "200",
+"Content-Length": "30",
+"Elapsed-Time": "681 ms",
+"REQUEST": { 
+"Headers": {"authorization":"Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==","user-agent":"PostmanRuntime/7.29.0","accept":"*/*","postman-token":"84d6fbff-f15f-41ad-8d37-3d8e3593db99","host":"localhost:3000","accept-encoding":"gzip, deflate, br","connection":"keep-alive"}, 
+"Body": {
+  "data": [
+    {
+      "type": "evaluationData",
+      "attributes": {
+        "foo": {
+          "bar": "0917"
+        },
+        "validationPoint": "timeEntry"
+      }
+    }
+  ]
+}
+}, 
+"RESPONSE": { 
+"Headers": {"x-powered-by":"Express","content-type":"application/json; charset=utf-8","content-length":"30","etag":"W/\"1e-byVly8ZDUbqpKnOKX9IN5M7Ygic\""}, 
+"Body": {
+    "data": {
+        "type": "evaluationResult",
+        "attributes": {
+            "evaluationStatus": "success",
+            "rule": {
+                "input": "@foo.bar == \"0917\"",
+                "output": true,
+                "evaluatedRule": {
+                    "type": "relationalExpression",
+                    "relation": "equality",
+                    "leftOperand": {
+                        "type": "fieldIdentifier",
+                        "objectName": "foo",
+                        "fieldPath": [
+                            "bar"
+                        ],
+                        "lookUpStatus": "found",
+                        "value": "0917",
+                        "computedValue": "0917"
+                    },
+                    "rightOperand": {
+                        "type": "stringConstant",
+                        "value": "0917",
+                        "computedValue": "0917"
+                    },
+                    "computedValue": true
+                }
+            }
+        }
+    }
+}
+}
+},
+
+{
+"GUID": "c30292e6-de4a-4ae9-9117-65c8e08471e7",
+"IP": "216.2.246.66",
+"Time": "2022-05-11T20:03:18.682Z",
+"Method": "POST",
+"URL": "/v1/rules/evaluatee",  
+"Status": "200",
+"Content-Length": "30",
+"Elapsed-Time": "681 ms",
+"REQUEST": { 
+"Headers": {"authorization":"Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==","user-agent":"PostmanRuntime/7.29.0","accept":"*/*","postman-token":"c4879e2c-cb7d-4a2b-a030-b3f2fb78cbdc","host":"localhost:3000","accept-encoding":"gzip, deflate, br","connection":"keep-alive"}, 
+"Body": {
+  "data": [
+    {
+      "type": "evaluationData",
+      "attributes": {
+        "invoice": {
+          "times": [
+            {
+              "currency": "USD",
+              "end": "2019-01-01T01:00:00Z",
+              "billAmount": 11000,
+              "quantity": "1"
+            },
+            {
+              "currency": "EU",
+              "end": "2019-01-01T02:00:00Z",
+              "billAmount": 100,
+              "quantity": "2"
+            },
+            {
+              "currency": "USD",
+              "end": "2019-01-01T03:00:00Z",
+              "billAmount": 3333333,
+              "quantity": "3"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "type": "rule",
+      "attributes": {
+        "expression": "sumItems(@invoice.times, @row.currency like \"%USD%\", @row.billAmount) > 10000"
+      }
+    }
+  ]
+}
+}, 
+"RESPONSE": { 
+"Headers": {"x-powered-by":"Express","content-type":"application/json; charset=utf-8","content-length":"30","etag":"W/\"1e-byVly8ZDUbqpKnOKX9IN5M7Ygic\""}, 
+"Body": {
+    "data": {
+        "type": "evaluationResult",
+        "attributes": {
+            "evaluationStatus": "success",
+            "rule": {
+                "input": "sumItems(@invoice.times, @row.currency like \"%USD%\", @row.billAmount) > 10000",
+                "output": true,
+                "evaluatedRule": {
+                    "type": "relationalExpression",
+                    "relation": "greaterThan",
+                    "leftOperand": {
+                        "type": "itemFunction",
+                        "name": "sumItems",
+                        "fieldIdentifier": {
+                            "type": "fieldIdentifier",
+                            "objectName": "invoice",
+                            "fieldPath": [
+                                "times"
+                            ]
+                        },
+                        "rule": {
+                            "type": "relationalExpression",
+                            "relation": "like",
+                            "leftOperand": {
+                                "type": "fieldIdentifier",
+                                "objectName": "row",
+                                "fieldPath": [
+                                    "currency"
+                                ]
+                            },
+                            "rightOperand": {
+                                "type": "stringConstant",
+                                "value": "%USD%"
+                            }
+                        },
+                        "expression": {
+                            "type": "fieldIdentifier",
+                            "objectName": "row",
+                            "fieldPath": [
+                                "billAmount"
+                            ],
+                            "lookUpStatus": "found",
+                            "value": 3333333,
+                            "computedValue": 3333333
+                        },
+                        "iteratorStats": {
+                            "totalRows": 3,
+                            "matches": 2
+                        },
+                        "computedValue": 3344333
+                    },
+                    "rightOperand": {
+                        "type": "numberConstant",
+                        "value": 10000,
+                        "computedValue": 10000
+                    },
+                    "computedValue": true
+                }
+            }
+        }
+    }
+}
+}
+},
+
+{
+"GUID": "838b7e80-76d9-4394-b0a3-f9178ba7c7ea",
+"IP": "216.2.246.66",
+"Time": "2022-05-11T20:03:29.810Z",
+"Method": "POST",
+"URL": "/v1/rules/evaluate",  
+"Status": "200",
+"Content-Length": "65",
+"Elapsed-Time": "683 ms",
+"REQUEST": { 
+"Headers": {"authorization":"Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==","user-agent":"PostmanRuntime/7.29.0","accept":"*/*","postman-token":"7e35e000-b642-40f1-bdbf-81652e48bbc3","host":"localhost:3000","accept-encoding":"gzip, deflate, br","connection":"keep-alive"}, 
+"Body": {
+  "data": [
+    {
+      "type": "evaluationData",
+      "attributes": {
+        "poses": [
+          {
+            "name": "Mountain",
+            "requiresLegs": true
+          },
+          {
+            "name": "Tree",
+            "requiresLegs": false
+          }
+        ]
+      }
+    },
+    {
+      "type": "rule",
+      "attributes": {
+        "expression": "countItems(@poses, @row.requiresLegs == true) > 0"
+      }
+    }
+  ]
+}
+}, 
+"RESPONSE": { 
+"Headers": {"x-powered-by":"Express","content-type":"application/json; charset=utf-8","content-length":"30","etag":"W/\"1e-byVly8ZDUbqpKnOKX9IN5M7Ygic\""}, 
+"Body": {
+    "data": {
+        "type": "evaluationResult",
+        "attributes": {
+            "evaluationStatus": "success",
+            "rule": {
+                "input": "countItems(@poses, @row.requiresLegs == true) > 0",
+                "output": false,
+                "evaluatedRule": {
+                    "type": "relationalExpression",
+                    "relation": "greaterThan",
+                    "leftOperand": {
+                        "type": "itemFunction",
+                        "name": "countItems",
+                        "fieldIdentifier": {
+                            "type": "fieldIdentifier",
+                            "objectName": "poses",
+                            "fieldPath": null
+                        },
+                        "rule": {
+                            "type": "relationalExpression",
+                            "relation": "equality",
+                            "leftOperand": {
+                                "type": "fieldIdentifier",
+                                "objectName": "row",
+                                "fieldPath": [
+                                    "requiresLegs"
+                                ]
+                            },
+                            "rightOperand": {
+                                "type": "booleanConstant",
+                                "value": true
+                            }
+                        },
+                        "iteratorStats": {
+                            "totalRows": 0,
+                            "matches": 0
+                        },
+                        "computedValue": 0
+                    },
+                    "rightOperand": {
+                        "type": "numberConstant",
+                        "value": 0,
+                        "computedValue": 0
+                    },
+                    "computedValue": false
+                }
+            }
+        }
+    }
+}
+}
+},
+
+{
+"GUID": "165ac508-f72b-4183-8d6c-73c1c79fb6cd",
+"IP": "216.2.246.66",
+"Time": "2022-05-11T20:03:35.889Z",
+"Method": "POST",
+"URL": "/v1/rules/evaluate",  
+"Status": "200",
+"Content-Length": "30",
+"Elapsed-Time": "304 ms",
+"REQUEST": { 
+"Headers": {"authorization":"Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==","user-agent":"PostmanRuntime/7.29.0","accept":"*/*","postman-token":"2041ea90-4f3b-46a8-8e26-6bad96da7fa5","host":"localhost:3000","accept-encoding":"gzip, deflate, br","connection":"keep-alive"}, 
+"Body": {
+  "data": [
+    {
+      "type": "evaluationData",
+      "attributes": {
+        "poses": [
+          {
+            "name": "Mountain",
+            "requiresLegs": false
+          },
+          {
+            "name": "Tree",
+            "requiresLegs": true
+          }
+        ]
+      }
+    },
+    {
+      "type": "rule",
+      "attributes": {
+        "expression": "allItems(@poses, @row.requiresLegs == true)"
+      }
+    }
+  ]
+}
+}, 
+"RESPONSE": { 
+"Headers": {"x-powered-by":"Express","content-type":"application/json; charset=utf-8","content-length":"30","etag":"W/\"1e-byVly8ZDUbqpKnOKX9IN5M7Ygic\""}, 
+"Body": {
+    "data": {
+        "type": "evaluationResult",
+        "attributes": {
+            "evaluationStatus": "success",
+            "rule": {
+                "input": "allItems(@poses, @row.requiresLegs == true)",
+                "output": true,
+                "evaluatedRule": {
+                    "type": "itemFunction",
+                    "name": "allItems",
+                    "fieldIdentifier": {
+                        "type": "fieldIdentifier",
+                        "objectName": "poses",
+                        "fieldPath": null
+                    },
+                    "rule": {
+                        "type": "relationalExpression",
+                        "relation": "equality",
+                        "leftOperand": {
+                            "type": "fieldIdentifier",
+                            "objectName": "row",
+                            "fieldPath": [
+                                "requiresLegs"
+                            ]
+                        },
+                        "rightOperand": {
+                            "type": "booleanConstant",
+                            "value": true
+                        }
+                    },
+                    "iteratorStats": {
+                        "totalRows": 0,
+                        "firstUnmatchedIndex": -1
+                    },
+                    "computedValue": true
+                }
+            }
+        }
+    }
+}
+}
+},
+
+{
+"GUID": "8f5d7bed-a4d0-4111-80ef-9713eaf34350",
+"IP": "216.2.246.66",
+"Time": "2022-05-11T20:03:39.536Z",
+"Method": "POST",
+"URL": "/routeTwo",  
+"Status": "200",
+"Content-Length": "30",
+"Elapsed-Time": "307 ms",
+"REQUEST": { 
+"Headers": {"authorization":"Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==","user-agent":"PostmanRuntime/7.29.0","accept":"*/*","postman-token":"0e99af8a-d368-4bf9-89e8-875d002a82fc","host":"localhost:3000","accept-encoding":"gzip, deflate, br","connection":"keep-alive"}, 
+"Body": {
+  "data": [
+    {
+      "type": "evaluationData",
+      "attributes": {
+        "poses": [
+          {
+            "name": "Mountain",
+            "requiresLegs": false
+          },
+          {
+            "name": "Tree",
+            "requiresLegs": true
+          }
+        ]
+      }
+    },
+    {
+      "type": "rule",
+      "attributes": {
+        "expression": "anyItems(@poses, @row.requiresLegs == true)"
+      }
+    }
+  ]
+}
+}, 
+"RESPONSE": { 
+"Headers": {"x-powered-by":"Express","content-type":"application/json; charset=utf-8","content-length":"30","etag":"W/\"1e-byVly8ZDUbqpKnOKX9IN5M7Ygic\""}, 
+"Body": {
+    "data": {
+        "type": "evaluationResult",
+        "attributes": {
+            "evaluationStatus": "success",
+            "rule": {
+                "input": "anyItems(@poses, @row.requiresLegs == true)",
+                "output": false,
+                "evaluatedRule": {
+                    "type": "itemFunction",
+                    "name": "anyItems",
+                    "fieldIdentifier": {
+                        "type": "fieldIdentifier",
+                        "objectName": "poses",
+                        "fieldPath": null,
+                        "rowCount": 0
+                    },
+                    "rule": {
+                        "type": "relationalExpression",
+                        "relation": "equality",
+                        "leftOperand": {
+                            "type": "fieldIdentifier",
+                            "objectName": "row",
+                            "fieldPath": [
+                                "requiresLegs"
+                            ]
+                        },
+                        "rightOperand": {
+                            "type": "booleanConstant",
+                            "value": true
+                        }
+                    },
+                    "iteratorStats": {
+                        "totalRows": 0
+                    },
+                    "computedValue": false
+                }
+            }
+        }
+    }
+}
+}
+},
+
+{
+"GUID": "f5d38ee5-ed91-4904-aa6c-a103894499a9",
+"IP": "216.2.246.66",
+"Time": "2022-05-11T20:04:03.745Z",
+"Method": "POST",
+"URL": "/v1/rules/evaluate",  
+"Status": "200",
+"Content-Length": "80",
+"Elapsed-Time": "315 ms",
+"REQUEST": { 
+"Headers": {"authorization":"Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==","user-agent":"PostmanRuntime/7.29.0","accept":"*/*","postman-token":"17bab13a-d1ce-48cb-8b23-f94d8484e680","host":"localhost:3000","accept-encoding":"gzip, deflate, br","connection":"keep-alive"}, 
+"Body": {
+    "data": [
+        {
+            "type": "evaluationData",
+            "attributes": {
+                "lineItem": {
+                    "name": "entry1",
+                    "lineItemDescription": "spaces before and after     "
+                }
+            }
+        },
+        {
+            "type": "rule",
+            "attributes": {
+                "expression": "trimRight(@lineItem.lineItemDescription) == \"spaces before and after\""
+            }
+        }
+    ]
+}
+}, 
+"RESPONSE": { 
+"Headers": {"x-powered-by":"Express","content-type":"application/json; charset=utf-8","content-length":"30","etag":"W/\"1e-byVly8ZDUbqpKnOKX9IN5M7Ygic\""}, 
+"Body": {
+    "data": {
+        "type": "evaluationResult",
+        "attributes": {
+            "evaluationStatus": "error",
+            "rule": {
+                "input": "trimRight(@lineItem.lineItemDescription) == \"spaces before and after\"",
+                "evaluatedRule": {
+                    "type": "relationalExpression",
+                    "relation": "equality",
+                    "leftOperand": {
+                        "type": "simpleStringFunction",
+                        "name": "trimRight",
+                        "expression": {
+                            "type": "fieldIdentifier",
+                            "objectName": "lineItem",
+                            "fieldPath": [
+                                "lineItemDescription"
+                            ],
+                            "lookUpStatus": "found",
+                            "value": "spaces before and after     ",
+                            "computedValue": "spaces before and after     "
+                        }
+                    },
+                    "rightOperand": {
+                        "type": "stringConstant",
+                        "value": "spaces before and after"
+                    }
+                }
+            },
+            "error": {
+                "message": "evalObj(...).trimEnd is not a function",
+                "stack": "TypeError: evalObj(...).trimEnd is not a function\n    at evalSimpleStringFunction (C:\\home\\site\\wwwroot\\lib\\ruleProcessor\\index.js:432:91)\n    at evalObj (C:\\home\\site\\wwwroot\\lib\\ruleProcessor\\index.js:512:75)\n    at evalRelationalExpression (C:\\home\\site\\wwwroot\\lib\\ruleProcessor\\index.js:208:29)\n    at evalObj (C:\\home\\site\\wwwroot\\lib\\ruleProcessor\\index.js:500:75)\n    at process (C:\\home\\site\\wwwroot\\lib\\ruleProcessor\\index.js:554:47)\n    at handleEvaluatePostedRule (C:\\home\\site\\wwwroot\\routes\\api\\rules\\index.js:611:35)\n    at C:\\home\\site\\wwwroot\\routes\\api\\rules\\index.js:757:53\n    at Layer.handle [as handle_request] (C:\\home\\site\\wwwroot\\node_modules\\express\\lib\\router\\layer.js:95:5)\n    at next (C:\\home\\site\\wwwroot\\node_modules\\express\\lib\\router\\route.js:137:13)\n    at Route.dispatch (C:\\home\\site\\wwwroot\\node_modules\\express\\lib\\router\\route.js:112:3)"
+            }
+        }
+    }
+}
+}
+},
+
+{
+"GUID": "40ca60ec-417b-4124-8dfe-1adbe854a0b3",
+"IP": "216.2.246.66",
+"Time": "2022-05-11T20:04:09.806Z",
+"Method": "POST",
+"URL": "/v1/rules/evaluate",  
+"Status": "401",
+"Content-Length": "30",
+"Elapsed-Time": "317 ms",
+"REQUEST": { 
+"Headers": {"authorization":"Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==","user-agent":"PostmanRuntime/7.29.0","accept":"*/*","postman-token":"ac8ebd6d-577d-49e4-ae93-a3d83e0ab07d","host":"localhost:3000","accept-encoding":"gzip, deflate, br","connection":"keep-alive"}, 
+"Body": {
+    "data": [
+        {
+            "type": "evaluationData",
+            "attributes": {
+                "timeEntry": {
+                    "name": "entry1",
+                    "transactionDate": "2022-03-05T00:00:00.000Z"
+                }
+            }
+        },
+        {
+            "type": "rule",
+            "attributes": {
+                "expression": "dateDay(#02/11/2021#) == 11\r\nand\r\ndateMonth(#02/11/2021#) == 2\r\nand\r\ndateYear(#02/11/2021#) == 2021"
+            }
+        }
+    ]
+}
+}, 
+"RESPONSE": { 
+"Headers": {"x-powered-by":"Express","content-type":"application/json; charset=utf-8","content-length":"30","etag":"W/\"1e-byVly8ZDUbqpKnOKX9IN5M7Ygic\""}, 
+"Body": {
+    "statusCode": 401,
+    "message": "Access denied due to invalid subscription key. Make sure to provide a valid key for an active subscription."
+}
+}
+},
+
+{
+"GUID": "6f1d7f6c-58a4-4e75-8617-fcc25a9afe70",
+"IP": "216.2.246.66",
+"Time": "2022-05-11T20:04:16.269Z",
+"Method": "POST",
+"URL": "/v1/rules/evaluate",  
+"Status": "200",
+"Content-Length": "30",
+"Elapsed-Time": "674 ms",
+"REQUEST": { 
+"Headers": {"authorization":"Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==","user-agent":"PostmanRuntime/7.29.0","accept":"*/*","postman-token":"2fd66d07-c287-4b2f-ad29-f3c9391abc5d","host":"localhost:3000","accept-encoding":"gzip, deflate, br","connection":"keep-alive"}, 
+"Body": {
+    "data": [
+        {
+            "type": "evaluationData",
+            "attributes": {
+                "timeEntry": {
+                    "name": "entry1",
+                    "narrative": "Foo foo Adjustment: Courtesy Discount sadasda"
+                }
+            }
+        },
+        {
+            "type": "rule",
+            "attributes": {
+                "expression": "contains(@timeEntry.narrative, \"Fee Adjustment: Courtesy Discount\", \"foo\" )"
+            }
+        }
+    ]
+}
+}, 
+"RESPONSE": { 
+"Headers": {"x-powered-by":"Express","content-type":"application/json; charset=utf-8","content-length":"30","etag":"W/\"1e-byVly8ZDUbqpKnOKX9IN5M7Ygic\""}, 
+"Body": {
+    "data": {
+        "type": "evaluationResult",
+        "attributes": {
+            "evaluationStatus": "success",
+            "rule": {
+                "input": "contains(@timeEntry.narrative, \"Fee Adjustment: Courtesy Discount\", \"foo\" )",
+                "output": true,
+                "evaluatedRule": {
+                    "type": "relationalExpression",
+                    "relation": "contains",
+                    "expression": {
+                        "type": "fieldIdentifier",
+                        "objectName": "timeEntry",
+                        "fieldPath": [
+                            "narrative"
+                        ],
+                        "lookUpStatus": "found",
+                        "value": "Foo foo Adjustment: Courtesy Discount sadasda",
+                        "computedValue": "Foo foo Adjustment: Courtesy Discount sadasda"
+                    },
+                    "list": {
+                        "type": "expressionList",
+                        "value": [
+                            {
+                                "type": "stringConstant",
+                                "value": "Fee Adjustment: Courtesy Discount",
+                                "computedValue": "Fee Adjustment: Courtesy Discount"
+                            },
+                            {
+                                "type": "stringConstant",
+                                "value": "foo",
+                                "computedValue": "foo"
+                            }
+                        ],
+                        "computedValue": [
+                            "Fee Adjustment: Courtesy Discount",
+                            "foo"
+                        ]
+                    },
+                    "computedValue": true
+                }
+            }
+        }
+    }
+}
+}
+},
+

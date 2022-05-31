@@ -1,0 +1,39 @@
+{
+"GUID": "40ca60ec-417b-4124-8dfe-1adbe854a0b3",
+"IP": "216.2.246.66",
+"Time": "2022-05-11T20:04:09.806Z",
+"Method": "POST",
+"URL": "/v1/rules/evaluate",  
+"Status": "401",
+"Content-Length": "30",
+"Elapsed-Time": "317 ms",
+"REQUEST": { 
+"Headers": {"authorization":"Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==","user-agent":"PostmanRuntime/7.29.0","accept":"*/*","postman-token":"ac8ebd6d-577d-49e4-ae93-a3d83e0ab07d","host":"localhost:3000","accept-encoding":"gzip, deflate, br","connection":"keep-alive"}, 
+"Body": {
+    "data": [
+        {
+            "type": "evaluationData",
+            "attributes": {
+                "timeEntry": {
+                    "name": "entry1",
+                    "transactionDate": "2022-03-05T00:00:00.000Z"
+                }
+            }
+        },
+        {
+            "type": "rule",
+            "attributes": {
+                "expression": "dateDay(#02/11/2021#) == 11\r\nand\r\ndateMonth(#02/11/2021#) == 2\r\nand\r\ndateYear(#02/11/2021#) == 2021"
+            }
+        }
+    ]
+}
+}, 
+"RESPONSE": { 
+"Headers": {"x-powered-by":"Express","content-type":"application/json; charset=utf-8","content-length":"30","etag":"W/\"1e-byVly8ZDUbqpKnOKX9IN5M7Ygic\""}, 
+"Body": {
+    "statusCode": 401,
+    "message": "Access denied due to invalid subscription key. Make sure to provide a valid key for an active subscription."
+}
+}
+}
