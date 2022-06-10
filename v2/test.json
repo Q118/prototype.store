@@ -1,0 +1,24 @@
+{
+    "requestId": "912ba013-48db-46c7-8534-495eb6c56105",
+    "step": "new",
+    "source": {
+        "method": "GET",
+        "url": "/v1/guidelines/96a5331c-6c42-4cfe-8f2b-54640d962101",
+        "ip": "::1",
+        "headers": {
+            "x-api-user": "acctenantusdev",
+            "x-api-key": "5640e342b30042268eba508b6ec90d7d",
+            "ocp-apim-subscription-key": "3d519c4fb57d42bb84505bfb8cc64099",
+            "cookie": "ARRAffinitySameSite=4d0bf8a034bef2a73d6df8e02094735bede3b37b4cdba30ad8d13592b30e385b; connect.sid=s%3AKMrTX3eIja29arbRrDSlOBx9zqGFCyfU.kmdRImBk3gg8TsyH0Jibi%2BTNL1Xpaih46nhhN%2FPKe3Y",
+            "user-agent": "PostmanRuntime/7.29.0",
+            "accept": "*/*",
+            "postman-token": "377dcb31-142d-4542-8802-3e9a725cfab6",
+            "host": "localhost:8080",
+            "accept-encoding": "gzip, deflate, br",
+            "connection": "keep-alive"
+        }
+    },
+    "startTime": "2022-06-07T23:36:14.715Z",
+    "endTime": null,
+    "duration": null
+}

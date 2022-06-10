@@ -17,8 +17,6 @@ const connectionString = process.env.AZURE_STORAGE_CONNECTION_STRING;
 //so first get all the messages from the queu > array
 // for each of those array messages, get the blob data from the blob container with that name and print the data to the UI (log to console for now)
 
-//! THE LOGIC IS ALL HERE SHELBY! BEFORE U START TO IMPLEMENT ELSEWHERE, FIX THE ASYNC STUFF HAPPENING... RUN THIS FILE AND THEN NEED TO DO SOME TROUBLESHOOTING, *then* go try and implement.
-// prob take emnpty array to global and do try/catch shiz
 
 const readQueue = async () => {
     const azureQueue = new AzureQueue(connectionString, "apirequests");
