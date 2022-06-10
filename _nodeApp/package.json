@@ -1,0 +1,17 @@
+{
+  "name": "_nodeapp",
+  "version": "1.0.0",
+  "description": "standalone application for servicing azure table.",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node app.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "azure-storage": "^2.10.7",
+    "lodash": "^4.17.21"
+  }
+}
