@@ -5,12 +5,9 @@
 
 // const AzureBlob = require('./lib/azureBlob').AzureBlob;
 const AzureQueue = require('./lib/azureQueue').AzureQueue;
-// const { AzureTable, AzureTableStruct } = require('./lib/azureTable');
-
 const CallTracking = require('./models/CallTracking').CallTracking;
+const _ = require('lodash');
 
-
-//! like one row per reqID.. and a column for each property in the objects
 
 //TODO add config and tenantLOgic to this file using below for now
 const connectionString = "DefaultEndpointsProtocol=https;AccountName=accsrusdev;AccountKey=Plumb2Rm3XSJ3aF7sSc8Mm2XiPkZe0ILMIdSAPYhkfqpvGms7SYb/5hLICuewvfWVvjtDkZcWP7MojXpS8TZuA==;BlobEndpoint=https://accsrusdev.blob.core.windows.net/;QueueEndpoint=https://accsrusdev.queue.core.windows.net/;TableEndpoint=https://accsrusdev.table.core.windows.net/;FileEndpoint=https://accsrusdev.file.core.windows.net/;"
@@ -21,9 +18,7 @@ async function readQueue() {
     const count = await azureQueue.getCount();
     console.log(`${count} messages in queue`);
     console.log("reading queue...");
-
     const result = await azureQueue.peekMessages(10);
-
     let messageArray = [];
     for (const property in result) {
         let decryptMes = Buffer.from(result[property].messageText, 'base64').toString();
@@ -37,7 +32,7 @@ async function sortMessages(messageArray) {
     let relatedMsgArr = [];
     relatedMsgArr.push(messageArray[0]);
 
-    for (let x = 0; x < messageArray.length; x++) {
+    for (let x = 1; x < messageArray.length; x++) {
         if (relatedMsgArr[0].requestId === messageArray[x].requestId) {
             relatedMsgArr.push(messageArray[x]);
         }
@@ -46,46 +41,58 @@ async function sortMessages(messageArray) {
 }
 
 
-const newRow = {
-    PartitionKey: 'sssss',
-    RowKey: 'x',
-    serverTiming: 'this',
-    url: 'x',
-    status: 'x',
-    rule: 'x',
-    requestDataType: 'working?',
-    responseDataType: 'x',
-    method: 'x',
+// const findProps = (arr, localStep, item) => {
+//     // return arr.find(x => x.item !== undefined).item;
+//     return  _.find(arr, { step: localStep });
+// }
+
+
+async function messagesToRow(relArr) {
+    let newRow = {
+        PartitionKey: relArr[0].requestId,
+        RowKey: "",
+        serverTiming: _.find(relArr, {step: 'result'}).serverTimings,
+        url: "will get from blob",
+        status: _.find(relArr, {step: 'result'}).statusCode,
+        method: _.find(relArr, {step: 'start'}).method,
+        rule: "will get from blob",
+        requestDataType: "will get from blob",
+        responseDataType: "will get from blob"
+    }
+    //TODO : look into a more efficient+dynamic way to do this
+    // newRow = Object.assign({}, ...relArr);
+    console.log(newRow);
+    return newRow;
 }
 
 
-async function handleNewEntity() {
+
+async function handleNewEntity(dataRow) {
     let callTracking = new CallTracking();
-
     await callTracking.init();
-
-    console.log(callTracking.table.tableStruct);
-
-    await callTracking.merge(newRow);
-    // this is working but not with all the props, just partitiion adn rkey
-    console.log("sent to table!")
+    // console.log(callTracking.table.tableStruct); // debug
+    await callTracking.merge(dataRow);
+    console.log("data sent to table!")
 }
 
 
-handleNewEntity().then(result => {
-    console.log("done!")
-}).catch(err => {
-    console.log(err);
-});
 
+async function main() {
+    try {
+        let readResult = await readQueue();
 
-// readQueue().then(result => {
-//     // console.log(result);
-//     sortMessages(result).then(result => {
-//         console.log(result);
-//     }).catch(err => {
-//         console.log(err);
-//     })
-// }).catch(err => {
-//     console.log(err);
-// });
+        let sortedResult = await sortMessages(readResult);
+
+        console.log(sortedResult);
+        
+        let rowObject = await messagesToRow(sortedResult);
+
+        await handleNewEntity(rowObject);
+
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+main();
+

@@ -15,10 +15,10 @@ class CallTracking {
         this.storageConnectionString = storageConnectionString;
 
         this.init = this.init.bind(this);
-        //this.create = this.create.bind(this);
+        // this.create = this.create.bind(this);
         this.save = this.save.bind(this);
         this.merge = this.merge.bind(this);
-        //this.remove = this.remove.bind(this);
+        this.remove = this.remove.bind(this);
         //this.selectByUsername = this.selectByUsername.bind(this);
         this.selectAll = this.selectAll.bind(this);
     }
@@ -32,7 +32,7 @@ class CallTracking {
 
         await this.table.tableStruct
             .addString('ServerTiming')
-            .addString('URL')
+            .addString('url')
             .addString('Status')
             .addString('Rule')
             .addString('RequestDataType')
