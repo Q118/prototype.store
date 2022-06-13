@@ -7,7 +7,7 @@
 const AzureQueue = require('./lib/azureQueue').AzureQueue;
 // const { AzureTable, AzureTableStruct } = require('./lib/azureTable');
 
-const  CallTracking  = require('./models/CallTracking').CallTracking;
+const CallTracking = require('./models/CallTracking').CallTracking;
 
 
 //! like one row per reqID.. and a column for each property in the objects
@@ -47,31 +47,33 @@ async function sortMessages(messageArray) {
 
 
 const newRow = {
-    PartitionKey: 'is',
+    PartitionKey: 'sssss',
     RowKey: 'x',
-    ServerTiming: 'this',
-    URL: 'x',
-    Status: 'x',
-    Rule: 'x',
-    RequestDataType: 'working?',
-    ResponseDataType: 'x',
-    Method: 'x',
+    serverTiming: 'this',
+    url: 'x',
+    status: 'x',
+    rule: 'x',
+    requestDataType: 'working?',
+    responseDataType: 'x',
+    method: 'x',
 }
 
 
-async function handleNewRow() {
+async function handleNewEntity() {
     let callTracking = new CallTracking();
 
     await callTracking.init();
 
-   let resp = await callTracking.merge(newRow)
+    console.log(callTracking.table.tableStruct);
 
-    return resp;
+    await callTracking.merge(newRow);
+    // this is working but not with all the props, just partitiion adn rkey
+    console.log("sent to table!")
 }
 
 
-handleNewRow().then(result => {
-    console.log(result);
+handleNewEntity().then(result => {
+    console.log("done!")
 }).catch(err => {
     console.log(err);
 });

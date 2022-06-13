@@ -27,17 +27,17 @@ class CallTracking {
         if (storageConnectionString) {
             this.storageConnectionString = storageConnectionString;
         }
-        this.table = new AzureTable(this.storageConnectionString, 'CallTracking');
+        this.table = new AzureTable(this.storageConnectionString, 'devAPItable');
         await this.table.init();
 
         await this.table.tableStruct
-            .addString('DisplayName')
-            .addString('AzureLocation')
-            .addString('DeploymentStatus')
-            .addString('ApiSecret')
-            .addString('DbConnectionString')
-            .addString('StorageConnectionString')
-            .addString('Settings')      
+            .addString('ServerTiming')
+            .addString('URL')
+            .addString('Status')
+            .addString('Rule')
+            .addString('RequestDataType')
+            .addString('ResponseDataType')
+            .addString('Method')      
     }
 
     /*
@@ -55,20 +55,11 @@ class CallTracking {
         return this.table.insertOrMergeObj(saveObj);
     }
 
-    /*
     remove(obj) {
         return this.table.deleteEntityByKey(obj.PartitionKey, obj.RowKey);
     }
-    */
 
-    /*
-    async selectByUsername(username) {
-        const query = AzureTable.createQuery()
-            .top(1)
-            .where('RowKey eq ?', username);
-        return this.table.execQuery(query);
-    }
-    */
+
 
     async selectById(id) {
         let item = await this.table.retrieveObjById(id);
