@@ -18,15 +18,10 @@ const azureQueue = new AzureQueue(connectionString, "dev-queue");
 // TODO: add a check to see if queue is empty, if it is then done, if not then keep running main until it is empty
 
 async function readQueue() {
-
     try {
-        // the below 3 lines may not be needed at all. thinking just to do a set number? well lets try/catch this stuff..
         const count = await azureQueue.getCount();
         console.log(`${count} messages in queue`);
         console.log("reading queue...");
-
-        // const result = await azureQueue.peekMessages(count);
-
         const result = await AzureQueue.peekMessages(connectionString, "dev-queue", count);
         // console.log(result) // debug
         let msgArr = [];
@@ -45,21 +40,24 @@ async function readQueue() {
 }
 
 async function sortMessages(messageArray) {
-    let relatedMsgArr = [];
-    let idArray = [];
-    relatedMsgArr.push(messageArray[0].text);
-    idArray.push(messageArray[0].id);
-    for (let x = 1; x < messageArray.length; x++) {
-        if (relatedMsgArr[0].requestId === messageArray[x].text.requestId) {
-            relatedMsgArr.push(messageArray[x].text);
-            idArray.push(messageArray[x].id);
-            console.log("this should print 2x")
+    try {
+        let relatedMsgArr = [];
+        let idArray = [];
+        relatedMsgArr.push(messageArray[0].text);
+        idArray.push(messageArray[0].id);
+        for (let x = 1; x < messageArray.length; x++) {
+            if (relatedMsgArr[0].requestId === messageArray[x].text.requestId) {
+                relatedMsgArr.push(messageArray[x].text);
+                idArray.push(messageArray[x].id);
+            }
         }
+        console.log("deleting processed messages...")
+        dequeueMsg(idArray); // remove processed messages from queue
+        return relatedMsgArr;
+        // returns an array of 3 {}s with the same requestId
+    } catch (error) {
+        console.log(error)
     }
-    console.log("deleting processed messages...")
-    dequeueMsg(idArray); // remove processed messages from queue
-    return relatedMsgArr;
-    // returns an array of 3 {}s with the same requestId
 }
 
 async function dequeueMsg(idArray) {
@@ -106,9 +104,7 @@ async function getBlobURL(reqId, reqMethod) {
 }
 
 
-const getIt = (arr, step) => {
-    return _.find(arr, { step: step });
-}
+const getIt = (arr, step) => _.find(arr, { step: step });
 
 //! TODO refactor to try/catch block
 async function messagesToRow(relArr) {
@@ -135,12 +131,16 @@ async function messagesToRow(relArr) {
 }
 
 async function handleNewEntity(dataRow) {
-    let callTracking = new CallTracking();
-    await callTracking.init();
-    // console.log(callTracking.table.tableStruct); // debug
-    await callTracking.merge(dataRow);
-    console.log("data sent to table!")
-}
+    try {
+        let callTracking = new CallTracking();
+        await callTracking.init();
+        // console.log(callTracking.table.tableStruct); // debug
+        await callTracking.merge(dataRow);
+        console.log("data sent to table!")
+    } catch (error) {
+        console.log(error)
+    }
+};
 
 
 async function main() {
