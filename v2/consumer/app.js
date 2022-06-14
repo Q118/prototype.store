@@ -1,9 +1,4 @@
-// read from the queue, anything new? then read from the blob container that the message references and print out that data to the console 
 
-// does it get deleted once read? If so, then are we then storing the data in our app?/....
-//? like we delete it once we know what to do with it?
-// or no we keep it in there to use as reference...
-//! no deleting/dequeuing it
 const express = require('express');
 const fs = require('fs');
 // const { title } = require('process');

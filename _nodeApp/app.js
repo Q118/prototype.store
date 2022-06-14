@@ -40,18 +40,17 @@ async function sortMessages(messageArray) {
     return relatedMsgArr; // returns an array of 3 objects with the same requestId
 }
 
+const getItem = (arr, step) => {
+    return _.find(arr, {step: step});
+} 
 
-// const findProps = (arr, localStep, item) => {
-//     // return arr.find(x => x.item !== undefined).item;
-//     return  _.find(arr, { step: localStep });
-// }
-
-
+//! TODO PICK UP HERE! get the details from blob containers for rule, url, etc... you got it! love
 async function messagesToRow(relArr) {
     let newRow = {
         PartitionKey: relArr[0].requestId,
         RowKey: "",
-        serverTiming: _.find(relArr, {step: 'result'}).serverTimings,
+        // serverTiming: _.find(relArr, {step: 'result'}).serverTimings,
+        serverTiming: getItem(relArr, 'result').serverTimings,
         url: "will get from blob",
         status: _.find(relArr, {step: 'result'}).statusCode,
         method: _.find(relArr, {step: 'start'}).method,
@@ -59,9 +58,7 @@ async function messagesToRow(relArr) {
         requestDataType: "will get from blob",
         responseDataType: "will get from blob"
     }
-    //TODO : look into a more efficient+dynamic way to do this
-    // newRow = Object.assign({}, ...relArr);
-    console.log(newRow);
+    console.log(newRow); // debug
     return newRow;
 }
 
