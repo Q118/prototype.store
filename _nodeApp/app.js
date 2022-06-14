@@ -17,6 +17,8 @@ const azureBlob = new AzureBlob(connectionString, "dev-blobs");
 
 // TODO: add a check to see if queue is empty, if it is then done, if not, then keep running main until it is empty
 
+//TODO: handle 'blob not existing for any reason..
+
 async function readQueue(count) {
     try {
         const result = await AzureQueue.peekMessages(connectionString, "dev-queue", count);
@@ -39,7 +41,8 @@ async function readQueue(count) {
 async function sortMessages(messageArray) {
     try {
         let relatedMsgArr = [];
-        relatedMsgArr.push(messageArray[0]); // pushes in {text: {}, id: ""}
+        relatedMsgArr.push(messageArray[0]); 
+        // pushes in {text: {}, id: ""}
         for (let x = 1; x < messageArray.length; x++) {
             if (relatedMsgArr[0].text.requestId === messageArray[x].text.requestId) {
                 relatedMsgArr.push(messageArray[x]);
@@ -63,9 +66,6 @@ async function dequeueMsg(idArray) {
         console.log(error)
     }
 }
-
-// TODO: add error-handling for if blob doesn't exist for any reason.
-// doing this now, trying it by seeing the console errors when queue is empty...
 
 async function getBlobURL(reqId, reqMethod) {
     console.log("capturing blob url...")
@@ -106,8 +106,23 @@ async function getBlobRules(reqId, reqMethod) {
 }
 
 async function getReqDataType(reqId, reqMethod) {
-
+    console.log("capturing request data type...")
+    try {
+        if (reqMethod === "GET") {
+            let dataType = "n/a"
+            return dataType;
+        }
+        let bodyBlob = await azureBlob.readBlob(`${reqId}-body.json`);
+            bodyBlob = JSON.parse(bodyBlob);
+        let dataArr = bodyBlob?.data;
+        let dataType = dataArr.map(data => data.type);
+            dataType = dataType.join(", ");        
+        return dataType;
+    } catch (error) {
+        console.log(error)
+    }
 }
+
 async function getResDataType(reqId, reqMethod) { }
 
 
@@ -125,7 +140,7 @@ async function messagesToRow(relArr) {
             method,
             url: await getBlobURL(PartitionKey, method) || "",
             rule: await getBlobRules(PartitionKey, method) || "",
-            requestDataType: "WIP",
+            requestDataType: await getReqDataType(PartitionKey, method) || "",
             responseDataType: "WIP"
             // have the two dataTYpes, I believe is enough to suffice the developer investigating the calls. 
             // bc they can infer by the type, what kind of action is happening.
@@ -151,22 +166,18 @@ async function handleNewEntity(dataRow) {
 
 
 async function main() {
-    //TODO: ADD---- while count is > 0, do all this stuff
-    // once it is zero, then done and exit the loop
     const count = await azureQueue.getCount();
     console.log(`${count} messages in queue`);
     if (count < 3) { return; }
     try {
         let readResult = await readQueue(count);
-
         let sortedResult = await sortMessages(readResult);
         // console.log(sortedResult); //debug
-
         let rowObject = await messagesToRow(sortedResult.map(message => message?.text));
         await handleNewEntity(rowObject);
 
         // delete messages once successfully recorded on table:
-        await dequeueMsg(sortedResult.map(msg => msg.id));
+        // await dequeueMsg(sortedResult.map(msg => msg.id));
         // ! commenting out above so can work in dev, come back and uncomment later.
         return;
     } catch (error) {
