@@ -42,19 +42,14 @@ async function readQueue() {
 async function sortMessages(messageArray) {
     try {
         let relatedMsgArr = [];
-        let idArray = [];
-        relatedMsgArr.push(messageArray[0].text);
-        idArray.push(messageArray[0].id);
+        relatedMsgArr.push(messageArray[0]); // pushes in {text: {}, id: ""}
         for (let x = 1; x < messageArray.length; x++) {
-            if (relatedMsgArr[0].requestId === messageArray[x].text.requestId) {
-                relatedMsgArr.push(messageArray[x].text);
-                idArray.push(messageArray[x].id);
+            if (relatedMsgArr[0].text.requestId === messageArray[x].text.requestId) {
+                relatedMsgArr.push(messageArray[x]);
             }
         }
-        console.log("deleting processed messages...")
-        dequeueMsg(idArray); // remove processed messages from queue
         return relatedMsgArr;
-        // returns an array of 3 {}s with the same requestId
+        // returns an array of 3 {}s with the same text.requestId
     } catch (error) {
         console.log(error)
     }
@@ -77,12 +72,14 @@ async function getBlobData(reqId, method) {
     try {
         const azureBlob = new AzureBlob(connectionString, "dev-blobs");
         console.log("reading blob data...");
+
         let startBlob = await azureBlob.readBlob(`${reqId}-start.json`);
         startBlob = JSON.parse(startBlob);
         let bodyBlob = method === "GET" ? "{}" : await azureBlob.readBlob(`${reqId}-body.json`);
         bodyBlob = JSON.parse(bodyBlob);
         let resultBlob = await azureBlob.readBlob(`${reqId}-result.json`);
         resultBlob = JSON.parse(resultBlob);
+
         let blobArray = [startBlob, bodyBlob, resultBlob];
         return blobArray;
     } catch (error) {
@@ -90,27 +87,38 @@ async function getBlobData(reqId, method) {
     }
 }
 
-// console log before this gets called console.log("gathering blob details...")
 async function getBlobURL(reqId, reqMethod) {
+    console.log("capturing blob url...")
     try {
         const blobArray = await getBlobData(reqId, reqMethod);
-        console.log(blobArray);
         const blobURL = _.find(blobArray, { method: reqMethod }).url;
-        console.log(blobURL);
         return blobURL;
     } catch (error) {
         console.log(error)
     }
 }
 
+// async function getBlobRules(reqId) {
+//     console.log("capturing blob rule(s)...")
+//     try {
+
+
+//         // const azureBlob = new AzureBlob(connectionString, "dev-blobs");
+//         // console.log("reading blob rules...");
+//         // let rules = await azureBlob.readBlob(`${reqId}-rules.json`);
+//         // rules = JSON.parse(rules);
+//         return rules;
+//     } catch (error) {
+//         console.log(error)
+//     }
+// }
+
 
 const getIt = (arr, step) => _.find(arr, { step: step });
 
-//! TODO refactor to try/catch block
 async function messagesToRow(relArr) {
     try {
         const PartitionKey = relArr[0].requestId;
-        // const url = await getBlobURL(PartitionKey, relArr[0].method);
         const method = getIt(relArr, 'start').method;
         let newRow = {
             PartitionKey,
@@ -123,7 +131,6 @@ async function messagesToRow(relArr) {
             requestDataType: "will get from blob",
             responseDataType: "will get from blob"
         }
-        console.log(newRow); // debug
         return newRow;
     } catch (error) {
         console.log(error)
@@ -136,7 +143,8 @@ async function handleNewEntity(dataRow) {
         await callTracking.init();
         // console.log(callTracking.table.tableStruct); // debug
         await callTracking.merge(dataRow);
-        console.log("data sent to table!")
+        console.log("data sent to table! Data: ")
+        console.log(dataRow);
     } catch (error) {
         console.log(error)
     }
@@ -146,15 +154,14 @@ async function handleNewEntity(dataRow) {
 async function main() {
     try {
         let readResult = await readQueue();
-
         let sortedResult = await sortMessages(readResult);
-
-        console.log(sortedResult);
-
-        let rowObject = await messagesToRow(sortedResult);
-
+        // console.log(sortedResult); //debug
+        
+        let rowObject = await messagesToRow(sortedResult.map(message => message.text));
         await handleNewEntity(rowObject);
 
+        // delete messages once successfully recorded on table:
+        await dequeueMsg(sortedResult.map(msg => msg.id));
     } catch (error) {
         console.log(error);
     }

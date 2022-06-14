@@ -94,3 +94,27 @@ let msgArr = [
     id: '1ca38e02-3c2e-4769-8cf6-cb083bb54383'
   }
 ]
+
+let relatedSorted = [
+  {
+    text: { requestId: 'dd00c08f-ed10-42a6-8165-2ae2e245687c', step: 'body' },
+    id: '400792f3-9d0e-4f1e-b8a5-01d01bb08e61'
+  },
+  {
+    text: {
+      requestId: 'dd00c08f-ed10-42a6-8165-2ae2e245687c',
+      step: 'start',
+      method: 'GET'
+    },
+    id: 'c61f773f-1545-4c15-8401-433c9f3aeddb'
+  },
+  {
+    text: {
+      requestId: 'dd00c08f-ed10-42a6-8165-2ae2e245687c',
+      step: 'result',
+      serverTimings: '255.5144ms',
+      statusCode: 200
+    },
+    id: '44a4f118-df45-42c8-8604-767fbd4209a1'
+  }
+]
