@@ -49,13 +49,16 @@ async function sortMessages(messageArray) {
 // }
 
 // TODO: add error-handling below if blob doesn't exist for any reason.
-async function getBlobDetails(reqId, method) {
+async function getBlobData(reqId, method) {
     try {
         const azureBlob = new AzureBlob(connectionString, "dev-blobs");
         console.log("reading blob data...");
         let startBlob = await azureBlob.readBlob(`${reqId}-start.json`);
-        let bodyBlob = method === "GET" ? {} : await azureBlob.readBlob(`${reqId}-body.json`);
+        startBlob = JSON.parse(startBlob);
+        let bodyBlob = method === "GET" ? "{}" : await azureBlob.readBlob(`${reqId}-body.json`);
+        bodyBlob = JSON.parse(bodyBlob);
         let resultBlob = await azureBlob.readBlob(`${reqId}-result.json`);
+        resultBlob = JSON.parse(resultBlob);
         let blobArray = [startBlob, bodyBlob, resultBlob];
         return blobArray;
     } catch (error) {
@@ -63,25 +66,38 @@ async function getBlobDetails(reqId, method) {
     }
 }
 
-getBlobDetails("51f191d4-52a6-408e-897d-f85909bf345d", "GET").then(result => {
-    console.log(result)
-}).catch(err => {
-    console.log(err)
-})
+// console log before this gets called console.log("gathering blob details...")
+async function getBlobURL(reqId, reqMethod) {
+    try {
+        const blobArray = await getBlobData(reqId, reqMethod);
+        console.log(blobArray);
+        const blobURL = _.find(blobArray, { method: reqMethod }).url;
+        console.log(blobURL);
+        return blobURL;
+    } catch (error) {
+        console.log(error)
+    }
+}
+
+// getBlobURL("51f191d4-52a6-408e-897d-f85909bf345d", "GET");
+
 
 const getIt = (arr, step) => {
     return _.find(arr, { step: step });
 }
 
-//! TODO PICK UP HERE! get the details from blob containers for rule, url, etc... you got it! love
+//! TODO refactor to try/catch block
 async function messagesToRow(relArr) {
+    const PartitionKey = relArr[0].requestId;
+    // const url = await getBlobURL(PartitionKey, relArr[0].method);
+    const method = getIt(relArr, 'start').method;
     let newRow = {
-        PartitionKey: relArr[0].requestId,
+        PartitionKey,
         RowKey: "",
         serverTiming: getIt(relArr, 'result').serverTimings,
-        url: "will get from blob",
         status: getIt(relArr, 'result').statusCode,
-        method: getIt(relArr, 'start').method,
+        method,
+        url: await getBlobURL(PartitionKey, method),
         rule: "will get from blob",
         requestDataType: "will get from blob",
         responseDataType: "will get from blob"
@@ -89,7 +105,6 @@ async function messagesToRow(relArr) {
     console.log(newRow); // debug
     return newRow;
 }
-
 
 
 async function handleNewEntity(dataRow) {
@@ -119,5 +134,5 @@ async function main() {
     }
 }
 
-// main();
+main();
 
