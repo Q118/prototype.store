@@ -14,26 +14,6 @@ const exampleResponse = [
 
 
 
-for (let x = 1; x < relArr.length; x++) {
-
-  newRow.PartitionKey = relArr[x].requestId;
-
-  newRow.serverTiming = newRow.serverTiming !== null ? relArr[x].serverTimings || "" : newRow.serverTiming;
-
-  newRow.url = newRow.url !== null ? relArr[x].url || "" : newRow.url;
-
-  newRow.status = newRow.statusCode !== "" ? relArr[x].statusCode || "" : newRow.statusCode;
-  newRow.method = newRow.method !== "" ? relArr[x].method || "" : newRow.method;
-
-  console.log(newRow.method)//! this is logged so why not recording in table??
-
-
-  // TODO logic to get the below props from blob
-  newRow.rule = relArr[x].rule || "";
-  newRow.requestDataType = relArr[x].requestDataType || "";
-  newRow.responseDataType = relArr[x].responseDataType || "";
-}
-
 var azure = require('azure-storage');
 var queueService = azure.createQueueService();
 var queueName = 'taskqueue';
@@ -92,6 +72,68 @@ let msgArr = [
       statusCode: 200
     },
     id: '1ca38e02-3c2e-4769-8cf6-cb083bb54383'
+  }
+]
+
+
+let inputForMessagesToRow = [
+  {
+    requestId: '5cf8394e-4cf4-4ffd-bc99-28ee068119d3',
+    step: 'body'
+  },
+  {
+    requestId: '5cf8394e-4cf4-4ffd-bc99-28ee068119d3',
+    step: 'start',
+    method: 'GET'
+  },
+  {
+    requestId: '5cf8394e-4cf4-4ffd-bc99-28ee068119d3',
+    step: 'result',
+    serverTimings: '1874.8029ms',
+    statusCode: 200
+  }
+]
+
+const bodyBlob = {
+  data: [
+    { type: 'evaluationData', attributes: [Object] },
+
+    { type: 'rule', attributes: [Object] }
+  ]
+}
+
+
+let blobArray = [
+  {
+    method: 'GET',
+    url: '/v1/eav/test/test',
+    IP: '::ffff:127.0.0.1',
+    machineName: 'WSNA2180',
+    headers: {
+      accept: 'application/json, text/plain, */*',
+      'content-type': 'application/json',
+      'ocp-apim-subscription-key': '3d519c4fb57d42bb84505bfb8cc64099',
+      'x-api-user': 'sr',
+      'x-api-key': 'f432bde6-402e-41de-a4cb-67b722ed16ba92b68684-077e-49d0-8e57-e359c6e6018a',
+      'user-agent': 'axios/0.19.0',
+      host: 'localhost:8080',
+      connection: 'close'
+    }
+  },
+  {},
+  {
+    headers: {
+      'x-powered-by': 'Express',
+      vary: 'Origin, Accept-Encoding',
+      'access-control-expose-headers': 'Server-Timing',
+      'cache-control': 'private, no-cache, no-store, must-revalidate',
+      expires: '-1',
+      pragma: 'no-cache',
+      'content-type': 'application/json; charset=utf-8',
+      'content-length': '474',
+      etag: 'W/"1da-4+4J3JsdvZHi+xUfWLLC7ynyjAM"'
+    },
+    response: { links: [Object], data: [Array], meta: [Object] }
   }
 ]
 

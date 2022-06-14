@@ -12,7 +12,7 @@ const _ = require('lodash');
 const connectionString = "DefaultEndpointsProtocol=https;AccountName=accsrusdev;AccountKey=Plumb2Rm3XSJ3aF7sSc8Mm2XiPkZe0ILMIdSAPYhkfqpvGms7SYb/5hLICuewvfWVvjtDkZcWP7MojXpS8TZuA==;BlobEndpoint=https://accsrusdev.blob.core.windows.net/;QueueEndpoint=https://accsrusdev.queue.core.windows.net/;TableEndpoint=https://accsrusdev.table.core.windows.net/;FileEndpoint=https://accsrusdev.file.core.windows.net/;"
 
 const azureQueue = new AzureQueue(connectionString, "dev-queue");
-
+const azureBlob = new AzureBlob(connectionString, "dev-blobs");
 //! TODO ADD error-handling got all use-cases!!
 
 // TODO: add a check to see if queue is empty, if it is then done, if not then keep running main until it is empty
@@ -68,9 +68,10 @@ async function dequeueMsg(idArray) {
 }
 
 // TODO: add error-handling below if blob doesn't exist for any reason.
+// also I think we can remove this function and use the loig in getBLobUrl.. etc, instead
 async function getBlobData(reqId, method) {
     try {
-        const azureBlob = new AzureBlob(connectionString, "dev-blobs");
+        // const azureBlob = new AzureBlob(connectionString, "dev-blobs");
         console.log("reading blob data...");
 
         let startBlob = await azureBlob.readBlob(`${reqId}-start.json`);
@@ -98,20 +99,37 @@ async function getBlobURL(reqId, reqMethod) {
     }
 }
 
-// async function getBlobRules(reqId) {
-//     console.log("capturing blob rule(s)...")
-//     try {
+async function getBlobRules(reqId, reqMethod) {
+    console.log("capturing blob rule(s)...")
+    try {
+        if (reqMethod === "GET") {
+            let blobRule = "n/a"
+            return blobRule;
+        }
+        let resultBlob = await azureBlob.readBlob(`${reqId}-result.json`);
+        resultBlob = JSON.parse(resultBlob);
+        let resultData = resultBlob.response?.data?.attributes;
+        let blobRule = resultData?.rule?.input || resultData.triggeredRules || "n/a";
+        if (typeof blobRule !== "string" && blobRule !== undefined) {
+            let rules = [];
+            blobRule.forEach(element => {
+                rules.push(element.expression);
+            });
+            return rules;
+        }
+        return blobRule;
+        // will return either one rule that evaluated or a array of rules being evaluated
+    } catch (error) {
+        console.log(error)
+    }
+}
+// getBlobRules("758afbcc-bc34-4552-8e6b-f1ac605a475c", "POST").then(result => {
+//     console.log(result)
+// }).catch(error => { console.log(error) })
+// getBlobRules("5a88ceca-ae7d-4cb9-83ce-137484dfdf8d", "POST").then(result => {
+//     console.log(result)
+// }).catch(error => { console.log(error) })
 
-
-//         // const azureBlob = new AzureBlob(connectionString, "dev-blobs");
-//         // console.log("reading blob rules...");
-//         // let rules = await azureBlob.readBlob(`${reqId}-rules.json`);
-//         // rules = JSON.parse(rules);
-//         return rules;
-//     } catch (error) {
-//         console.log(error)
-//     }
-// }
 
 
 const getIt = (arr, step) => _.find(arr, { step: step });
@@ -123,13 +141,13 @@ async function messagesToRow(relArr) {
         let newRow = {
             PartitionKey,
             RowKey: "",
-            serverTiming: getIt(relArr, 'result').serverTimings,
+            serverTiming: getIt(relArr, 'result').serverTimings || "",
             status: getIt(relArr, 'result').statusCode,
             method,
             url: await getBlobURL(PartitionKey, method),
-            rule: "will get from blob",
-            requestDataType: "will get from blob",
-            responseDataType: "will get from blob"
+            rule: await getBlobRules(PartitionKey, method),
+            requestDataType: "lets remove this column",
+            responseDataType: "this too, its enough to have rule-data"
         }
         return newRow;
     } catch (error) {
@@ -156,7 +174,7 @@ async function main() {
         let readResult = await readQueue();
         let sortedResult = await sortMessages(readResult);
         // console.log(sortedResult); //debug
-        
+
         let rowObject = await messagesToRow(sortedResult.map(message => message.text));
         await handleNewEntity(rowObject);
 
