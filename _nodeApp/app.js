@@ -15,33 +15,35 @@ const azureQueue = new AzureQueue(connectionString, "dev-queue");
 
 //! TODO ADD error-handling got all use-cases!!
 
+// TODO: add a check to see if queue is empty, if it is then done, if not then keep running main until it is empty
+
 async function readQueue() {
 
-    const count = await azureQueue.getCount();
-    console.log(`${count} messages in queue`);
-    console.log("reading queue...");
-    const result = await azureQueue.peekMessages(9);
-    // console.log(result) // debug
-    let msgArr = [];
-    // let msgIdArr = [];
-    for (const property in result) {
-        let decryptMes = Buffer.from(result[property].messageText, 'base64').toString();
+    try {
+        // the below 3 lines may not be needed at all. thinking just to do a set number? well lets try/catch this stuff..
+        const count = await azureQueue.getCount();
+        console.log(`${count} messages in queue`);
+        console.log("reading queue...");
 
-        let messageObj = {
-            text: JSON.parse(decryptMes),
-            id: result[property].messageId
+        // const result = await azureQueue.peekMessages(count);
+
+        const result = await AzureQueue.peekMessages(connectionString, "dev-queue", count);
+        // console.log(result) // debug
+        let msgArr = [];
+        for (const property in result) {
+            let decryptMes = Buffer.from(result[property].messageText, 'base64').toString();
+            let messageObj = {
+                text: JSON.parse(decryptMes),
+                id: result[property].messageId
+            }
+            msgArr.push(messageObj);
         }
-        msgArr.push(messageObj);
-        // msgTxtArr.push(JSON.parse(decryptMes));
-        // msgIdArr.push(result[property].messageId);
+        return msgArr;
+    } catch (error) {
+        console.log(error)
     }
-    //TODO: here or in another scope, DEQUEUE the messages that have been added to array
-    // dequeueMsg(msgIdArr);
-    console.log("msgArrL")
-    console.log(msgArr)
-    return msgArr;
 }
-//!! its deleting! but all 9 them, so try to move the deletion into the sorted scope? pass along the idArray... or another function to handle the id getting yes do that and yra can call in main.
+
 async function sortMessages(messageArray) {
     let relatedMsgArr = [];
     let idArray = [];
@@ -54,15 +56,9 @@ async function sortMessages(messageArray) {
             console.log("this should print 2x")
         }
     }
+    console.log("deleting processed messages...")
     dequeueMsg(idArray); // remove processed messages from queue
-    
-    console.log("id array: ")
-
-    console.log(idArray)
-
-    console.log("related msg arr: ")
-    console.log(relatedMsgArr)
-    return relatedMsgArr; 
+    return relatedMsgArr;
     // returns an array of 3 {}s with the same requestId
 }
 
