@@ -15,13 +15,10 @@ const azureQueue = new AzureQueue(connectionString, "dev-queue");
 const azureBlob = new AzureBlob(connectionString, "dev-blobs");
 //! TODO ADD error-handling got all use-cases!!
 
-// TODO: add a check to see if queue is empty, if it is then done, if not then keep running main until it is empty
+// TODO: add a check to see if queue is empty, if it is then done, if not, then keep running main until it is empty
 
-async function readQueue() {
+async function readQueue(count) {
     try {
-        const count = await azureQueue.getCount();
-        console.log(`${count} messages in queue`);
-        console.log("reading queue...");
         const result = await AzureQueue.peekMessages(connectionString, "dev-queue", count);
         // console.log(result) // debug
         let msgArr = [];
@@ -67,32 +64,15 @@ async function dequeueMsg(idArray) {
     }
 }
 
-// TODO: add error-handling below if blob doesn't exist for any reason.
-// also I think we can remove this function and use the loig in getBLobUrl.. etc, instead
-async function getBlobData(reqId, method) {
-    try {
-        // const azureBlob = new AzureBlob(connectionString, "dev-blobs");
-        console.log("reading blob data...");
-
-        let startBlob = await azureBlob.readBlob(`${reqId}-start.json`);
-        startBlob = JSON.parse(startBlob);
-        let bodyBlob = method === "GET" ? "{}" : await azureBlob.readBlob(`${reqId}-body.json`);
-        bodyBlob = JSON.parse(bodyBlob);
-        let resultBlob = await azureBlob.readBlob(`${reqId}-result.json`);
-        resultBlob = JSON.parse(resultBlob);
-
-        let blobArray = [startBlob, bodyBlob, resultBlob];
-        return blobArray;
-    } catch (error) {
-        console.log(error)
-    }
-}
+// TODO: add error-handling for if blob doesn't exist for any reason.
+// doing this now, trying it by seeing the console errors when queue is empty...
 
 async function getBlobURL(reqId, reqMethod) {
     console.log("capturing blob url...")
     try {
-        const blobArray = await getBlobData(reqId, reqMethod);
-        const blobURL = _.find(blobArray, { method: reqMethod }).url;
+        let startBlob = await azureBlob.readBlob(`${reqId}-start.json`);
+        startBlob = JSON.parse(startBlob);
+        const blobURL = startBlob.url || "";
         return blobURL;
     } catch (error) {
         console.log(error)
@@ -108,46 +88,47 @@ async function getBlobRules(reqId, reqMethod) {
         }
         let resultBlob = await azureBlob.readBlob(`${reqId}-result.json`);
         resultBlob = JSON.parse(resultBlob);
-        let resultData = resultBlob.response?.data?.attributes;
-        let blobRule = resultData?.rule?.input || resultData.triggeredRules || "n/a";
+        let resultData = resultBlob?.response?.data?.attributes;
+        let blobRule = resultData?.rule?.input || resultData?.triggeredRules || "n/a";
         if (typeof blobRule !== "string" && blobRule !== undefined) {
             let rules = [];
             blobRule.forEach(element => {
                 rules.push(element.expression);
             });
+            rules = rules.join(", ");
             return rules;
         }
         return blobRule;
-        // will return either one rule that evaluated or a array of rules being evaluated
+        // will return either one rule thats evaluated or an array of rules being evaluated
     } catch (error) {
         console.log(error)
     }
 }
-// getBlobRules("758afbcc-bc34-4552-8e6b-f1ac605a475c", "POST").then(result => {
-//     console.log(result)
-// }).catch(error => { console.log(error) })
-// getBlobRules("5a88ceca-ae7d-4cb9-83ce-137484dfdf8d", "POST").then(result => {
-//     console.log(result)
-// }).catch(error => { console.log(error) })
 
+async function getReqDataType(reqId, reqMethod) {
+
+}
+async function getResDataType(reqId, reqMethod) { }
 
 
 const getIt = (arr, step) => _.find(arr, { step: step });
 
 async function messagesToRow(relArr) {
     try {
-        const PartitionKey = relArr[0].requestId;
-        const method = getIt(relArr, 'start').method;
+        const PartitionKey = relArr[0]?.requestId;
+        const method = getIt(relArr, 'start')?.method;
         let newRow = {
             PartitionKey,
             RowKey: "",
-            serverTiming: getIt(relArr, 'result').serverTimings || "",
-            status: getIt(relArr, 'result').statusCode,
+            serverTiming: getIt(relArr, 'result')?.serverTimings || "",
+            status: getIt(relArr, 'result')?.statusCode || "",
             method,
-            url: await getBlobURL(PartitionKey, method),
-            rule: await getBlobRules(PartitionKey, method),
-            requestDataType: "lets remove this column",
-            responseDataType: "this too, its enough to have rule-data"
+            url: await getBlobURL(PartitionKey, method) || "",
+            rule: await getBlobRules(PartitionKey, method) || "",
+            requestDataType: "WIP",
+            responseDataType: "WIP"
+            // have the two dataTYpes, I believe is enough to suffice the developer investigating the calls. 
+            // bc they can infer by the type, what kind of action is happening.
         }
         return newRow;
     } catch (error) {
@@ -170,20 +151,32 @@ async function handleNewEntity(dataRow) {
 
 
 async function main() {
+    //TODO: ADD---- while count is > 0, do all this stuff
+    // once it is zero, then done and exit the loop
+    const count = await azureQueue.getCount();
+    console.log(`${count} messages in queue`);
+    if (count < 3) { return; }
     try {
-        let readResult = await readQueue();
+        let readResult = await readQueue(count);
+
         let sortedResult = await sortMessages(readResult);
         // console.log(sortedResult); //debug
 
-        let rowObject = await messagesToRow(sortedResult.map(message => message.text));
+        let rowObject = await messagesToRow(sortedResult.map(message => message?.text));
         await handleNewEntity(rowObject);
 
         // delete messages once successfully recorded on table:
         await dequeueMsg(sortedResult.map(msg => msg.id));
+        // ! commenting out above so can work in dev, come back and uncomment later.
+        return;
     } catch (error) {
         console.log(error);
     }
 }
 
-main();
+main().then(() => {
+    console.log("done!");
+}).catch(err => {
+    console.log(err);
+});
 
