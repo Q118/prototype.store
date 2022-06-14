@@ -3,7 +3,7 @@
  *
  */
 
-// const AzureBlob = require('./lib/azureBlob').AzureBlob;
+const AzureBlob = require('./lib/azureBlob').AzureBlob;
 const AzureQueue = require('./lib/azureQueue').AzureQueue;
 const CallTracking = require('./models/CallTracking').CallTracking;
 const _ = require('lodash');
@@ -18,13 +18,14 @@ async function readQueue() {
     const count = await azureQueue.getCount();
     console.log(`${count} messages in queue`);
     console.log("reading queue...");
-    const result = await azureQueue.peekMessages(10);
+    const result = await azureQueue.peekMessages(9);
     let messageArray = [];
     for (const property in result) {
         let decryptMes = Buffer.from(result[property].messageText, 'base64').toString();
         messageArray.push(JSON.parse(decryptMes));
     }
     //TODO: here or in another scope, DEQUEUE the messages that have been added to array
+    // dequeueMsg(messageArray);
     return messageArray;
 }
 
@@ -40,20 +41,47 @@ async function sortMessages(messageArray) {
     return relatedMsgArr; // returns an array of 3 objects with the same requestId
 }
 
-const getItem = (arr, step) => {
-    return _.find(arr, {step: step});
-} 
+// async function dequeueMsg(messageArray) {
+//     const azureQueue = new AzureQueue(connectionString, "dev-queue");
+//     for (let x = 0; x < messageArray.length; x++) {
+//         await azureQueue.deleteMessage(messageArray[x].messageId);
+//     }
+// }
+
+// TODO: add error-handling below if blob doesn't exist for any reason.
+async function getBlobDetails(reqId, method) {
+    try {
+        const azureBlob = new AzureBlob(connectionString, "dev-blobs");
+        console.log("reading blob data...");
+        let startBlob = await azureBlob.readBlob(`${reqId}-start.json`);
+        let bodyBlob = method === "GET" ? {} : await azureBlob.readBlob(`${reqId}-body.json`);
+        let resultBlob = await azureBlob.readBlob(`${reqId}-result.json`);
+        let blobArray = [startBlob, bodyBlob, resultBlob];
+        return blobArray;
+    } catch (error) {
+        console.log(error)
+    }
+}
+
+getBlobDetails("51f191d4-52a6-408e-897d-f85909bf345d", "GET").then(result => {
+    console.log(result)
+}).catch(err => {
+    console.log(err)
+})
+
+const getIt = (arr, step) => {
+    return _.find(arr, { step: step });
+}
 
 //! TODO PICK UP HERE! get the details from blob containers for rule, url, etc... you got it! love
 async function messagesToRow(relArr) {
     let newRow = {
         PartitionKey: relArr[0].requestId,
         RowKey: "",
-        // serverTiming: _.find(relArr, {step: 'result'}).serverTimings,
-        serverTiming: getItem(relArr, 'result').serverTimings,
+        serverTiming: getIt(relArr, 'result').serverTimings,
         url: "will get from blob",
-        status: _.find(relArr, {step: 'result'}).statusCode,
-        method: _.find(relArr, {step: 'start'}).method,
+        status: getIt(relArr, 'result').statusCode,
+        method: getIt(relArr, 'start').method,
         rule: "will get from blob",
         requestDataType: "will get from blob",
         responseDataType: "will get from blob"
@@ -81,7 +109,7 @@ async function main() {
         let sortedResult = await sortMessages(readResult);
 
         console.log(sortedResult);
-        
+
         let rowObject = await messagesToRow(sortedResult);
 
         await handleNewEntity(rowObject);
@@ -91,5 +119,5 @@ async function main() {
     }
 }
 
-main();
+// main();
 
