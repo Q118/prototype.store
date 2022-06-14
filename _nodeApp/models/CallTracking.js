@@ -1,7 +1,7 @@
 /**
- * Tenant
+ * CallTracking
  * 
- * CallTracking of the application
+ * CallTracking of the API
  *
  */
 const _ = require('lodash');
