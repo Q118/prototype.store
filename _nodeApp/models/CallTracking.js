@@ -67,6 +67,11 @@ class CallTracking {
         return item;
     }
 
+    async doesEntityExist(partitionKey) {
+        let item = await this.table.checkExistById(partitionKey);
+        return item;
+    }
+
     async selectAll() {
         let items = await this.table.execQueryAllObj();
         items.forEach(item => CallTracking.addTenantIdToObj(item));
