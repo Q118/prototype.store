@@ -8,12 +8,13 @@ const AzureQueue = require('./lib/azureQueue').AzureQueue;
 const CallTracking = require('./models/CallTracking').CallTracking;
 const _ = require('lodash');
 
+require('dotenv').config();
 //TODO add config and tenantLOgic to this file using below for now
-const connectionString = "DefaultEndpointsProtocol=https;AccountName=accsrusdev;AccountKey=Plumb2Rm3XSJ3aF7sSc8Mm2XiPkZe0ILMIdSAPYhkfqpvGms7SYb/5hLICuewvfWVvjtDkZcWP7MojXpS8TZuA==;BlobEndpoint=https://accsrusdev.blob.core.windows.net/;QueueEndpoint=https://accsrusdev.queue.core.windows.net/;TableEndpoint=https://accsrusdev.table.core.windows.net/;FileEndpoint=https://accsrusdev.file.core.windows.net/;"
+const connectionString = process.env.AZURE_STORAGE_CONNECTION_STRING;
 
 const azureQueue = new AzureQueue(connectionString, "dev-queue");
 const azureBlob = new AzureBlob(connectionString, "dev-blobs");
-//! TODO ADD error-handling got all use-cases!!
+
 
 // TODO: add a check to see if queue is empty, if it is then done, if not, then keep running main until it is empty
 
