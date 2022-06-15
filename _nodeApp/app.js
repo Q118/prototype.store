@@ -41,7 +41,7 @@ async function readQueue(count) {
 async function sortMessages(messageArray) {
     try {
         let relatedMsgArr = [];
-        relatedMsgArr.push(messageArray[0]); 
+        relatedMsgArr.push(messageArray[0]);
         // pushes in {text: {}, id: ""}
         for (let x = 1; x < messageArray.length; x++) {
             if (relatedMsgArr[0].text.requestId === messageArray[x].text.requestId) {
@@ -113,17 +113,29 @@ async function getReqDataType(reqId, reqMethod) {
             return dataType;
         }
         let bodyBlob = await azureBlob.readBlob(`${reqId}-body.json`);
-            bodyBlob = JSON.parse(bodyBlob);
-        let dataArr = bodyBlob?.data;
-        let dataType = dataArr.map(data => data.type);
-            dataType = dataType.join(", ");        
+        bodyBlob = JSON.parse(bodyBlob);
+        let dataArr = bodyBlob?.data || "";
+        let dataType = Array.isArray(dataArr) ? dataArr.map(data => data.type).join(", ") : dataArr;
         return dataType;
     } catch (error) {
         console.log(error)
     }
 }
 
-async function getResDataType(reqId, reqMethod) { }
+
+async function getResDataType(reqId) {
+    console.log("capturing response data type...")
+    try {
+        let resultBlob = await azureBlob.readBlob(`${reqId}-result.json`);
+        resultBlob = JSON.parse(resultBlob).response;
+        let dataArr = resultBlob?.data || "";
+        let dataType = Array.isArray(dataArr) ? dataArr.map(data => data.type).join(", ") : dataArr.type;
+        return dataType;
+    } catch (error) {
+        console.log(error)
+    }
+}
+
 
 
 const getIt = (arr, step) => _.find(arr, { step: step });
@@ -141,7 +153,7 @@ async function messagesToRow(relArr) {
             url: await getBlobURL(PartitionKey, method) || "",
             rule: await getBlobRules(PartitionKey, method) || "",
             requestDataType: await getReqDataType(PartitionKey, method) || "",
-            responseDataType: "WIP"
+            responseDataType: await getResDataType(PartitionKey) || "",
             // have the two dataTYpes, I believe is enough to suffice the developer investigating the calls. 
             // bc they can infer by the type, what kind of action is happening.
         }
@@ -166,23 +178,23 @@ async function handleNewEntity(dataRow) {
 
 
 async function main() {
-    const count = await azureQueue.getCount();
-    console.log(`${count} messages in queue`);
-    if (count < 3) { return; }
-    try {
-        let readResult = await readQueue(count);
-        let sortedResult = await sortMessages(readResult);
-        // console.log(sortedResult); //debug
-        let rowObject = await messagesToRow(sortedResult.map(message => message?.text));
-        await handleNewEntity(rowObject);
+        const count = await azureQueue.getCount();
+        console.log(`${count} messages in queue`);
+        if (count < 3) { return; }
+        try {
+            let readResult = await readQueue(count);
+            let sortedResult = await sortMessages(readResult);
+            // console.log(sortedResult); //debug
+            let rowObject = await messagesToRow(sortedResult.map(message => message?.text));
+            await handleNewEntity(rowObject);
 
-        // delete messages once successfully recorded on table:
-        // await dequeueMsg(sortedResult.map(msg => msg.id));
-        // ! commenting out above so can work in dev, come back and uncomment later.
-        return;
-    } catch (error) {
-        console.log(error);
-    }
+            // delete messages once successfully recorded on table:
+            await dequeueMsg(sortedResult.map(msg => msg.id));
+            // ! comment out above during dev to not delete.
+            return;
+        } catch (error) {
+            console.log(error);
+        }
 }
 
 main().then(() => {
