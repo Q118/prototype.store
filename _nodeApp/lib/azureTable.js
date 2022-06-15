@@ -269,17 +269,7 @@ class AzureTable {
         return obj;
     }
 
-    async checkExistById(id) {
-        let query = AzureTable.createQuery()
-            .top(1)
-            .where('PartitionKey eq ?', id);
-        let results = await this.execQueryAllObj(query);
-        if (results && results.length == 1) {
-            return true;
-        }
-        return false;
-    }
-
+    
     deleteEntityByKey(partitionKey, rowKey) {
         return new Promise((resolve, reject) => {
             const key = {

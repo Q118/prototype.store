@@ -59,8 +59,6 @@ class CallTracking {
         return this.table.deleteEntityByKey(obj.PartitionKey, obj.RowKey);
     }
 
-
-
     async selectById(id) {
         let item = await this.table.retrieveObjById(id);
         CallTracking.addTenantIdToObj(item);
@@ -68,8 +66,11 @@ class CallTracking {
     }
 
     async doesEntityExist(partitionKey) {
-        let item = await this.table.checkExistById(partitionKey);
-        return item;
+        let item = await this.table.retrieveObjById(partitionKey);
+        if (item) {
+            return true;
+        }
+        return false;
     }
 
     async selectAll() {
