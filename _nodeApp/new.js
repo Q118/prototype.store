@@ -65,7 +65,7 @@ async function sortMessages(msgObj) {
         case "result":
             result = await handleResultAdd(msgObj)
             return result;
-        default: throw new Error(`Unknown type ${msgObj}`);
+        default: throw new Error(`Unknown step in ${msgObj}`);
     }
 }
 
@@ -84,19 +84,37 @@ async function handleStartAdd(msgObj) {
             await handleEntity(objToAdd);
         } else {
             // then we create a new row
+            //TODO: add a new row to the table
+            //? but hold up... maybe we dont need an else bc merging will work whether it exists or not.
+            // like below works the same!! I just tested it and it does... omg so i dont even have to check the existence!!!
+            //! ywp dd it again from app.js and YES it works whether exists or not.
+            let objToAdd = {
+                PartitionKey,
+                RowKey: "",
+                method: msgObj.method,
+            }
+            await handleEntity(objToAdd);
         }
     } catch (error) {
         console.log(error)
     }
 }
 
-// #region helper functions
+//! DO WE even need this function? because there is no data in the bodyQueue...
+        // Yes bc we need it will get data from the BLOB.
 async function handleBodyAdd(msgObj) {
     console.log("handling result...")
     try {
+        const PartitionKey = msgObj?.requestId;
         let rowExists = await checkRowExists(msgObj);
         if (rowExists) {
             // then we update the row
+            let objToAdd = {
+                PartitionKey,
+                RowKey: "",
+                method: msgObj.method,
+            }
+            await handleEntity(objToAdd);
         } else {
             // then we create a new row
         }

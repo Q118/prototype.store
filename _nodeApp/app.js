@@ -182,13 +182,13 @@ async function handleNewEntity(dataRow) {
  * @param {*} data 
  * @returns 
  */
- async function evalObj(obj, data) {
-    switch (obj.type) {
-        case "serverTiming":
-            return data;
-        default: throw new Error(`Unknown type ${obj.type}`);
-    }
-}
+//  async function evalObj(obj, data) {
+//     switch (obj.type) {
+//         case "serverTiming":
+//             return data;
+//         default: throw new Error(`Unknown type ${obj.type}`);
+//     }
+// }
 
 async function main() {
     let count = await azureQueue.getCount();
