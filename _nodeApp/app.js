@@ -1,28 +1,25 @@
 /**
- * @description This file will read queue messages and organize them and write them to columns in a table
- *
- */
-
+* @description This file will read queue messages, 
+* organize them with associated blobs,
+* and write them to columns in a table
+*/
 const AzureBlob = require('./lib/azureBlob').AzureBlob;
 const AzureQueue = require('./lib/azureQueue').AzureQueue;
 const CallTracking = require('./models/CallTracking').CallTracking;
+
 const _ = require('lodash');
 require('dotenv').config({ path: __dirname + '/.env' });
-//! YOU NEED TO DO IT LIKE THIS EVERYWHERE for debugging esp
 
-
-
-//TODO add config and tenantLOgic to this file using below for now
+//TODO add config and tenantLOgic to this file, using below for now
 const connectionString = process.env.AZURE_STORAGE_CONNECTION_STRING;
-
 const azureQueue = new AzureQueue(connectionString, "dev-queue");
 const azureBlob = new AzureBlob(connectionString, "dev-blobs");
 
+//! i do wonder if I should have a global objToAdd {} and use the ... operator to add to it
 
-
-async function readQueue(count) {
+async function readQueue() {
     try {
-        const result = await AzureQueue.peekMessages(connectionString, "dev-queue", count);
+        const result = await AzureQueue.peekMessages(connectionString, "dev-queue", 1);
         // console.log(result) // debug
         let msgArr = [];
         for (const property in result) {
@@ -33,87 +30,47 @@ async function readQueue(count) {
             }
             msgArr.push(messageObj);
         }
-        return msgArr;
+        return msgArr[0]; // {text: {}, id: ""}
     } catch (error) {
         console.log(error)
     }
 }
 
-async function sortMessages(messageArray) {
-    try {
-        let relatedMsgArr = [];
-        relatedMsgArr.push(messageArray[0]);
-        // pushes in {text: {}, id: ""}
-        for (let x = 1; x < messageArray.length; x++) {
-            if (relatedMsgArr[0].text.requestId === messageArray[x].text.requestId) {
-                relatedMsgArr.push(messageArray[x]);
-            }
-        }
-        return relatedMsgArr;
-        // returns an array of 3 {}s with the same text.requestId
-    } catch (error) {
-        console.log(error)
+
+async function sortMessages(msgObj) {
+    if (msgObj?.text === undefined) return;
+    switch (msgObj?.text?.step) {
+        case "start":
+            return await handleStartAdd(msgObj);
+        case "body":
+            return await handleBodyAdd(msgObj);
+        case "result":
+            return await handleResultAdd(msgObj);
+        default: throw new Error(`Unknown step in ${msgObj}`);
     }
 }
 
-async function dequeueMsg(idArray) {
-    try {
-        for (let x = 0; x < idArray.length; x++) {
-            let popReceipt = await azureQueue.getPopReceipt(idArray[x]);
-            await azureQueue.deleteMessage(idArray[x], popReceipt);
-            console.log(`deleted message ${idArray[x]}`)
-        }
-    } catch (error) {
-        console.log(error)
-    }
-}
-
-async function getBlobURL(reqId) {
+/**
+ * Data Fetching from Blobs
+ */
+async function getURL(reqId) {
     console.log("capturing blob url...")
     try {
         let startBlob = await azureBlob.readBlob(`${reqId}-start.json`);
-        startBlob = JSON.parse(startBlob) || "";
-        const blobURL = startBlob.url || "";
+        const blobURL = JSON.parse(startBlob).url || "";
         return blobURL;
     } catch (error) {
         console.log(error)
     }
 }
 
-async function getBlobRules(reqId, reqMethod) {
-    console.log("capturing blob rule(s)...")
-    try {
-        if (reqMethod === "GET") {
-            let blobRule = "n/a"
-            return blobRule;
-        }
-        let resultBlob = await azureBlob.readBlob(`${reqId}-result.json`);
-        resultBlob = JSON.parse(resultBlob);
-        let resultData = resultBlob?.response?.data?.attributes;
-        let blobRule = resultData?.rule?.input || resultData?.triggeredRules || "n/a";
-        if (typeof blobRule !== "string" && blobRule !== undefined) {
-            let rules = [];
-            blobRule.forEach(element => {
-                rules.push(element.expression);
-            });
-            rules = rules.join(", ");
-            return rules;
-        }
-        return blobRule;
-        // will return either one rule thats evaluated or an array of rules being evaluated
-    } catch (error) {
-        console.log(error)
-    }
-}
-
-async function getReqDataType(reqId, reqMethod) {
+async function getReqDataType(reqId) {
     console.log("capturing request data type...")
     try {
-        if (reqMethod === "GET") {
-            let dataType = "n/a"
-            return dataType;
-        }
         let bodyBlob = await azureBlob.readBlob(`${reqId}-body.json`);
+        if (bodyBlob === {}) {
+            return "n/a";
+        }
         bodyBlob = JSON.parse(bodyBlob);
         let dataArr = bodyBlob?.data || "";
         let dataType = Array.isArray(dataArr) ? dataArr.map(data => data.type).join(", ") : dataArr;
@@ -123,11 +80,12 @@ async function getReqDataType(reqId, reqMethod) {
     }
 }
 
-
 async function getResDataType(reqId) {
     console.log("capturing response data type...")
     try {
         let resultBlob = await azureBlob.readBlob(`${reqId}-result.json`);
+        if (resultBlob === undefined) return "";
+
         resultBlob = JSON.parse(resultBlob).response;
         let dataArr = resultBlob?.data || "";
         let dataType = Array.isArray(dataArr) ? dataArr.map(data => data.type).join(", ") : dataArr.type;
@@ -137,32 +95,97 @@ async function getResDataType(reqId) {
     }
 }
 
-const getIt = (arr, step) => _.find(arr, { step: step });
-
-async function messagesToRow(relArr) {
+/** 
+ * getBlobRules()
+ * @returns {String}
+ * will return either one rule thats evaluated or an 
+ * array of rules being evaluated.. all *as* string.
+*/
+async function getBlobRules(reqId) {
+    console.log("capturing blob rule(s)...")
     try {
-        const PartitionKey = relArr[0]?.requestId;
-        const method = getIt(relArr, 'start')?.method;
-        let newRow = {
-            PartitionKey,
-            RowKey: "",
-            serverTiming: getIt(relArr, 'result')?.serverTiming || "",
-            status: getIt(relArr, 'result')?.statusCode || "",
-            method,
-            url: await getBlobURL(PartitionKey) || "",
-            rule: await getBlobRules(PartitionKey, method) || "",
-            requestDataType: await getReqDataType(PartitionKey, method) || "",
-            responseDataType: await getResDataType(PartitionKey) || "",
-            // having the two dataTypes, I believe is enough to suffice the developer investigating the calls. 
-            // bc they can infer by the type, what kind of action is happening.
+        let bodyBlob = await azureBlob.readBlob(`${reqId}-body.json`);
+        if (bodyBlob === {}) {
+            return "n/a";
         }
-        return newRow;
+        let resultBlob = await azureBlob.readBlob(`${reqId}-result.json`);
+        resultBlob = JSON.parse(resultBlob);
+        let resultData = resultBlob?.response?.data?.attributes;
+        let blobRule = resultData?.rule?.input || resultData?.triggeredRules || "";
+        if (typeof blobRule !== "string" && blobRule !== undefined) {
+            let rules = [];
+            blobRule.forEach(element => {
+                rules.push(element.expression);
+            });
+            rules = rules.join(", ");
+            return rules;
+        }
+        return blobRule;
     } catch (error) {
         console.log(error)
     }
 }
 
-async function handleNewEntity(dataRow) {
+
+
+/**
+ * Object Builders
+ */
+async function handleStartAdd(msgObj) {
+    console.log("handling start...")
+    try {
+        const PK = msgObj?.text?.requestId;
+        let objToAdd = {
+            PartitionKey: PK,
+            RowKey: "",
+            method: msgObj?.text?.method || "",
+            url: await getURL(PK),
+        }
+        // await handleEntity(objToAdd);
+        return objToAdd;
+    } catch (error) {
+        console.log(error)
+    }
+}
+
+async function handleBodyAdd(msgObj) {
+    console.log("handling body...")
+    try {
+        const PK = msgObj?.text?.requestId;
+        let objToAdd = {
+            PartitionKey: PK,
+            RowKey: "",
+            rule: await getBlobRules(PK) || "",
+            requestDataType: await getReqDataType(PK) || "",
+            responseDataType: await getResDataType(PK) || "",
+        }
+        // await handleEntity(objToAdd);
+        return objToAdd;
+    } catch (error) {
+        console.log(error)
+    }
+}
+
+async function handleResultAdd(msgObj) {
+    console.log("handling result...")
+    try {
+        const PK = msgObj?.text?.requestId;
+        const serverTiming = msgObj?.text?.serverTiming;
+        const status = msgObj?.text?.statusCode;
+        let objToAdd = {
+            PartitionKey: PK,
+            RowKey: "",
+            status,
+            serverTiming,
+        }
+        // await handleEntity(objToAdd);
+        return objToAdd;
+    } catch (error) {
+        console.log(error)
+    }
+}
+
+async function handleEntity(dataRow) {
     try {
         let callTracking = new CallTracking();
         await callTracking.init();
@@ -175,43 +198,34 @@ async function handleNewEntity(dataRow) {
     }
 };
 
-
-/**
- * 
- * @param {{}} obj 
- * @param {*} data 
- * @returns 
- */
-//  async function evalObj(obj, data) {
-//     switch (obj.type) {
-//         case "serverTiming":
-//             return data;
-//         default: throw new Error(`Unknown type ${obj.type}`);
-//     }
-// }
-
-async function main() {
-    let count = await azureQueue.getCount();
-    //TODO case statement.. read my message... based on type call a different function
-    while (count > 0) {
-        console.log(`${count} messages in queue`);
-        if (count < 3) { return; }
-        try {
-            let readResult = await readQueue(count);
-            let sortedResult = await sortMessages(readResult);
-            // console.log(sortedResult); //debug
-            let rowObject = await messagesToRow(sortedResult.map(message => message?.text));
-            await handleNewEntity(rowObject);
-            // delete messages once successfully recorded on table:
-            await dequeueMsg(sortedResult.map(msg => msg.id));
-            // ! comment out above during dev to not delete.
-            count = await azureQueue.getCount(); // retrieve new count for the loop.
-        } catch (error) {
-            console.log(error);
-        }
+async function dequeueMsg(id) {
+    try {
+        let popReceipt = await azureQueue.getPopReceipt(id);
+        await azureQueue.deleteMessage(id, popReceipt);
+        console.log(`deleted message ${id}`)
+    } catch (error) {
+        console.log(error)
     }
 }
 
+async function main() {
+    try {
+        let readResult = await readQueue();
+
+        let objToAdd = await sortMessages(readResult);
+
+        await handleEntity(objToAdd);
+
+        // then delete the message once above line runs successfully.
+        await dequeueMsg(readResult.id);
+
+        //? keep going until all messages are used up? or nah.. handle that another way... bc can just call this whole file x amount of times with webJobs...
+        // if i do end up looping, can use the 'count' to keep track of how many messages are left in the queue.
+
+    } catch (error) {
+        console.log(error)
+    }
+}
 
 main().then(() => {
     console.log("done!");
