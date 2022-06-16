@@ -1,0 +1,16 @@
+{
+  "name": "migration",
+  "version": "1.0.0",
+  "description": "This folder will be used as a playground while developing new azureQueue, azureTable, and azureBlob JS files.",
+  "main": "azureBlob.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@azure/storage-queue": "^12.9.0",
+    "azure-storage": "^2.10.7"
+  }
+}

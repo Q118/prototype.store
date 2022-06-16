@@ -90,7 +90,6 @@ async function getResDataType(reqId) {
     try {
         let resultBlob = await azureBlob.readBlob(`${reqId}-result.json`);
         if (resultBlob === undefined) return "";
-
         resultBlob = JSON.parse(resultBlob).response;
         let dataArr = resultBlob?.data || "";
         let dataType = Array.isArray(dataArr) ? dataArr.map(data => data.type).join(", ") : dataArr.type;
@@ -212,18 +211,17 @@ async function dequeueMsg(id) {
 }
 
 async function main() {
+    //? keep going until all messages are used up? or nah.. handle that another way... bc can just call this whole file x amount of times with webJobs...
+    // if we do end up looping, can use the 'count' to keep track of how many messages are left in the queue.
     // while (...) {
-        try {
-            let readResult = await readQueue();
-            let objToAdd = await sortMessages(readResult);
-            await handleEntity(objToAdd);
-            // then delete the message once above line runs successfully.
-            await dequeueMsg(readResult?.id);
-            //? keep going until all messages are used up? or nah.. handle that another way... bc can just call this whole file x amount of times with webJobs...
-            // if we do end up looping, can use the 'count' to keep track of how many messages are left in the queue.
-        } catch (error) {
-            console.log(error)
-        }
+    try {
+        let readResult = await readQueue();
+        let objToAdd = await sortMessages(readResult);
+        await handleEntity(objToAdd);
+        await dequeueMsg(readResult?.id); // then delete the message once above line runs successfully.
+    } catch (error) {
+        console.log(error)
+    }
     // }
 }
 
