@@ -17,6 +17,11 @@ const azureBlob = new AzureBlob(connectionString, "dev-blobs");
 
 //! i do wonder if I should have a global objToAdd {} and use the ... operator to add to it
 
+/*
+TODO: still need to consider more outliers.. i.e how to grab rule data from a /compile route
+TODO: test out less used calls to ensure able to parse all of them
+*/
+
 async function readQueue() {
     try {
         const result = await AzureQueue.peekMessages(connectionString, "dev-queue", 1);
@@ -68,7 +73,7 @@ async function getReqDataType(reqId) {
     console.log("capturing request data type...")
     try {
         let bodyBlob = await azureBlob.readBlob(`${reqId}-body.json`);
-        if (bodyBlob === {}) {
+        if (bodyBlob === "{}") {
             return "n/a";
         }
         bodyBlob = JSON.parse(bodyBlob);
@@ -105,12 +110,12 @@ async function getBlobRules(reqId) {
     console.log("capturing blob rule(s)...")
     try {
         let bodyBlob = await azureBlob.readBlob(`${reqId}-body.json`);
-        if (bodyBlob === {}) {
+        if (bodyBlob === "{}") {
             return "n/a";
         }
         let resultBlob = await azureBlob.readBlob(`${reqId}-result.json`);
-        resultBlob = JSON.parse(resultBlob);
-        let resultData = resultBlob?.response?.data?.attributes;
+        resultBlob = JSON.parse(resultBlob).response;
+        let resultData = resultBlob?.data?.attributes || resultBlob?.data;
         let blobRule = resultData?.rule?.input || resultData?.triggeredRules || "";
         if (typeof blobRule !== "string" && blobRule !== undefined) {
             let rules = [];
@@ -182,6 +187,7 @@ async function handleResultAdd(msgObj) {
 }
 
 async function handleEntity(dataRow) {
+    if (dataRow === undefined) return;
     try {
         let callTracking = new CallTracking();
         await callTracking.init();
@@ -195,6 +201,7 @@ async function handleEntity(dataRow) {
 };
 
 async function dequeueMsg(id) {
+    if (id === undefined) return;
     try {
         let popReceipt = await azureQueue.getPopReceipt(id);
         await azureQueue.deleteMessage(id, popReceipt);
@@ -205,20 +212,22 @@ async function dequeueMsg(id) {
 }
 
 async function main() {
-    try {
-        let readResult = await readQueue();
-        let objToAdd = await sortMessages(readResult);
-        await handleEntity(objToAdd);
-        // then delete the message once above line runs successfully.
-        await dequeueMsg(readResult.id);
-
-        //? keep going until all messages are used up? or nah.. handle that another way... bc can just call this whole file x amount of times with webJobs...
-        // if i do end up looping, can use the 'count' to keep track of how many messages are left in the queue.
-
-    } catch (error) {
-        console.log(error)
-    }
+    // while (...) {
+        try {
+            let readResult = await readQueue();
+            let objToAdd = await sortMessages(readResult);
+            await handleEntity(objToAdd);
+            // then delete the message once above line runs successfully.
+            await dequeueMsg(readResult?.id);
+            //? keep going until all messages are used up? or nah.. handle that another way... bc can just call this whole file x amount of times with webJobs...
+            // if we do end up looping, can use the 'count' to keep track of how many messages are left in the queue.
+        } catch (error) {
+            console.log(error)
+        }
+    // }
 }
+
+
 
 main().then(() => {
     console.log("done!");

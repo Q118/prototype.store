@@ -82,7 +82,7 @@ class AzureQueue {
                     reject(error);
                     return;
                 }
-                resolve(serverMessages[0].popReceipt);
+                resolve(serverMessages[0]?.popReceipt);
             });
         });
     }
