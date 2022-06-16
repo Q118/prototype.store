@@ -36,7 +36,6 @@ async function readQueue() {
     }
 }
 
-
 async function sortMessages(msgObj) {
     if (msgObj?.text === undefined) return;
     switch (msgObj?.text?.step) {
@@ -49,6 +48,7 @@ async function sortMessages(msgObj) {
         default: throw new Error(`Unknown step in ${msgObj}`);
     }
 }
+
 
 /**
  * Data Fetching from Blobs
@@ -97,7 +97,7 @@ async function getResDataType(reqId) {
 
 /** 
  * getBlobRules()
- * @returns {String}
+ * @returns {Promise<String>}
  * will return either one rule thats evaluated or an 
  * array of rules being evaluated.. all *as* string.
 */
@@ -127,7 +127,6 @@ async function getBlobRules(reqId) {
 }
 
 
-
 /**
  * Object Builders
  */
@@ -141,7 +140,6 @@ async function handleStartAdd(msgObj) {
             method: msgObj?.text?.method || "",
             url: await getURL(PK),
         }
-        // await handleEntity(objToAdd);
         return objToAdd;
     } catch (error) {
         console.log(error)
@@ -159,7 +157,6 @@ async function handleBodyAdd(msgObj) {
             requestDataType: await getReqDataType(PK) || "",
             responseDataType: await getResDataType(PK) || "",
         }
-        // await handleEntity(objToAdd);
         return objToAdd;
     } catch (error) {
         console.log(error)
@@ -178,7 +175,6 @@ async function handleResultAdd(msgObj) {
             status,
             serverTiming,
         }
-        // await handleEntity(objToAdd);
         return objToAdd;
     } catch (error) {
         console.log(error)
@@ -211,11 +207,8 @@ async function dequeueMsg(id) {
 async function main() {
     try {
         let readResult = await readQueue();
-
         let objToAdd = await sortMessages(readResult);
-
         await handleEntity(objToAdd);
-
         // then delete the message once above line runs successfully.
         await dequeueMsg(readResult.id);
 
