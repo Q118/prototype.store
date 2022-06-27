@@ -23,7 +23,18 @@ async function readQueue() {
     }
 }
 
-readQueue().then(result => {
+async function writeToQueue(message) {
+    try {
+        let result = await azureQueue.insertMessage(message);
+        // console.log(result) // debug
+        return result;
+    } catch (error) {
+        console.log(error)
+    }
+}
+
+
+writeToQueue("I am a cute message").then(result => {
     console.log(result)
 }).catch(err => {
     console.log(err)
