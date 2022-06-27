@@ -10,12 +10,13 @@ const { QueueClient, QueueServiceClient, StorageSharedKeyCredential } = require(
 //? do we want a class for the ServiceClient also?
 
 class AzureQueue {
-    constructor(queueUrl, accountName, accountKey) {
+    constructor(queueName, accountName, accountKey) {
+        let queueUrl = `https://${accountName}.queue.core.windows.net/${queueName}`;
         this.queueSvc = new QueueClient( // creates an instance of the QueueClient class
-            queueUrl, // the URL holds the 'queueName'
+            queueUrl,
             new StorageSharedKeyCredential(accountName, accountKey)
         );
-        // this.queueServiceClient = new QueueServiceClient()
+        // this.queueServiceClient = new QueueServiceClient() //! unclear yet if this will be needed
         //? message Encoder:  new SDK does not have messageEncoder, handle it in the local implementation.
     }
 
@@ -43,7 +44,7 @@ class AzureQueue {
 
     async clearMessages() {
         try {
-            let responseData = await this.queueSvc.clearMessages(AbortSignal.none);
+            let responseData = await this.queueSvc.clearMessages();
             return responseData;
         } catch (error) {
             throw new Error(error);
@@ -79,14 +80,20 @@ class AzureQueue {
     async peekMessages() {
         try {
             let peekMessagesResponse = await this.queueSvc.peekMessages();
+            //By default, a *single* message is retrieved from the queue with above operation.
             return peekMessagesResponse.peekedMessageItems[0].messageText;
         } catch (error) {
             throw new Error(error);
         }
     }
 
-    static async doesQueueExist(queueUrl, accountName, accountKey) {
+    /**
+     * Static Methods
+     */
+
+    static async doesQueueExist(queueName, accountName, accountKey) {
         try {
+            let queueUrl = `https://${accountName}.queue.core.windows.net/${queueName}`;
             let queueSvc = new QueueClient(
                 queueUrl,
                 new StorageSharedKeyCredential(accountName, accountKey)
