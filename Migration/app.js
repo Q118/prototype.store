@@ -14,9 +14,22 @@ const azureQueue = new AzureQueue('dev-queue', accountName, accountKey);
 
 async function readQueue() {
     try {
-        let result = await azureQueue.peekMessages();
+        let result = await azureQueue.peekMessageText();
         // console.log(result) // debug
         result = JSON.parse(Buffer.from(result, 'base64').toString());
+        
+        // let result = await azureQueue.peekMessageId();
+        
+        return result;
+    } catch (error) {
+        console.log(error)
+    }
+}
+
+async function getData() {
+    try {
+        let result = await azureQueue.peekMessageData();
+        // console.log(result) // debug
         return result;
     } catch (error) {
         console.log(error)
@@ -43,19 +56,19 @@ async function deleteMessage() {
         console.log(error)
     }
 }
-deleteMessage().then(result => {
-    console.log(result)
-}).catch(err => {
-    console.log(err)
-})
-
-
-// we check below
-// readQueue().then(result => {
+// deleteMessage().then(result => {
 //     console.log(result)
 // }).catch(err => {
 //     console.log(err)
 // })
+
+
+// we check below
+getData().then(result => {
+    console.log(result)
+}).catch(err => {
+    console.log(err)
+})
 
 // writeToQueue("I am a cute message").then(result => {
 //     console.log(result)

@@ -75,7 +75,7 @@ class AzureQueue {
         } catch (error) {
             throw new Error(error);
         }
-    }
+    } //! this works for deleting the message on top... but for specifying which message to delete, we may need to refactor slightly
 
     // async getCount() {
     //? do we really need this method in this class? bc was only needed for peeking which we now can do without a count with new SDK
@@ -94,11 +94,21 @@ class AzureQueue {
 
     // getPopReceipt(messageId)?
 
-    async peekMessages() {
+    async peekMessageText() {
         try {
             let peekMessagesResponse = await this.queueSvc.peekMessages();
             //By default, a *single* message is retrieved from the queue with above operation.
             return peekMessagesResponse.peekedMessageItems[0].messageText;
+        } catch (error) {
+            throw new Error(error);
+        }
+    }
+
+    async peekMessageData() {
+        try {
+            let messageResponse = await this.queueSvc.receiveMessages();
+            //By default, a *single* message is retrieved from the queue with above operation.
+            return messageResponse.receivedMessageItems[0];
         } catch (error) {
             throw new Error(error);
         }
