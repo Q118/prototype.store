@@ -51,10 +51,27 @@ class AzureQueue {
         }
     }
 
-    async deleteMessage(messageId, popReceipt) {
+    /**
+     * You de-queue/delete a message in two steps. Call GetMessage at which point the message becomes invisible to any other code reading messages 
+     * from this queue for a default period of 30 seconds. To finish removing the message from the queue, you call DeleteMessage
+     * This two-step process ensures that if your code fails to process a message due to hardware or software failure, another instance of your code can get the same message and try again.
+     */
+    async deleteMessage() {
         try {
-            let responseData = await this.queueSvc.deleteMessage(messageId, popReceipt);
-            return responseData;
+            const dequeueResponse = await this.queueSvc.receiveMessages();
+            let deleteMessageResponse;
+            if (dequeueResponse.receivedMessageItems.length == 1) {
+                const dequeueMessageItem = dequeueResponse.receivedMessageItems[0];
+                console.log(`Processing & deleting message with ID: ${dequeueMessageItem.messageId}`);
+                deleteMessageResponse = await this.queueSvc.deleteMessage(
+                    dequeueMessageItem.messageId,
+                    dequeueMessageItem.popReceipt
+                );
+                console.log(
+                    `Deleted message successfully, service assigned request ID: ${deleteMessageResponse.requestId}`
+                );
+            }
+            return deleteMessageResponse;
         } catch (error) {
             throw new Error(error);
         }

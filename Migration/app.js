@@ -34,8 +34,31 @@ async function writeToQueue(message) {
 }
 
 
-writeToQueue("I am a cute message").then(result => {
+async function deleteMessage() {
+    try {
+        let result = await azureQueue.deleteMessage();
+        // console.log(result) // debug
+        return result;
+    } catch (error) {
+        console.log(error)
+    }
+}
+deleteMessage().then(result => {
     console.log(result)
 }).catch(err => {
     console.log(err)
 })
+
+
+// we check below
+// readQueue().then(result => {
+//     console.log(result)
+// }).catch(err => {
+//     console.log(err)
+// })
+
+// writeToQueue("I am a cute message").then(result => {
+//     console.log(result)
+// }).catch(err => {
+//     console.log(err)
+// })
