@@ -1,7 +1,7 @@
 /**
 * @description This file will read queue messages, 
 * organize them with associated blobs,
-* and write them to columns in a table
+* and write them to columns in a table... asynchronously
 */
 const AzureBlob = require('./lib/azureBlob').AzureBlob;
 const AzureQueue = require('./lib/azureQueue').AzureQueue;
@@ -19,7 +19,7 @@ const azureBlob = new AzureBlob(connectionString, "dev-blobs");
 
 /*
 TODO: still need to consider more outliers.. i.e how to grab rule data from a /compile route
-TODO: test out less used calls to ensure able to parse all of them
+TODO: test out lesser used calls to ensure able to parse all of them
 */
 
 async function readQueue() {
@@ -212,7 +212,7 @@ async function dequeueMsg(id) {
 
 async function main() {
     //? keep going until all messages are used up? or nah.. handle that another way... bc can just call this whole file x amount of times with webJobs...
-    // if we do end up looping, can use the 'count' to keep track of how many messages are left in the queue.
+    // if we do end up looping, could use the 'count' to keep track of how many messages are left in the queue.
     // while (...) {
     try {
         let readResult = await readQueue();
