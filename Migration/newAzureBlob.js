@@ -24,13 +24,11 @@ class AzureBlob {
         this.writeBlob = this.writeBlob.bind(this);
         this.readBlob = this.readBlob.bind(this);
         this.deleteBlob = this.deleteBlob.bind(this);
-        // this.listBlobs = this.listBlobs.bind(this);
         this.listAllBlobs = this.listAllBlobs.bind(this);
+        // this.listBlobs = this.listBlobs.bind(this);
         // this.listBlobsInFolder = this.listBlobsInFolder.bind(this);
         // this.listAllBlobsInFolder = this.listAllBlobsInFolder.bind(this);
-        // this.exists = this.exists.bind(this);
-
-        //? do we add in here an containerClient.create()?  -- do it in a static method
+        this.exists = this.exists.bind(this);
     }
 
     /**
@@ -98,7 +96,7 @@ class AzureBlob {
             let existence = await this.blobSvc.exists();
             return existence;
         } catch (error) {
-            return false;
+            throw new Error(error);
         }
     }
 
@@ -111,8 +109,54 @@ class AzureBlob {
         }
     }
 
+    /**
+     * static methods
+     */
+
+    static create(accountName, accountKey, containerName) {
+        return new AzureBlob(accountName, accountKey, containerName);
+    }
 
 
+    static readBlob(accountName, accountKey, containerName, blobName) {
+        return AzureBlob
+            .create(accountName, accountKey, containerName)
+            .readBlob(blobName);
+    }
+
+    static writeBlob(accountName, accountKey, containerName, blobName, blobContent) {
+        return AzureBlob
+            .create(accountName, accountKey, containerName)
+            .writeBlob(blobName, blobContent);
+    }
+
+    static deleteBlob(accountName, accountKey, containerName, blobName) {
+        return AzureBlob
+            .create(accountName, accountKey, containerName)
+            .deleteBlob(blobName);
+    }
+
+    static listAllBlobs(accountName, accountKey, containerName) {
+        return AzureBlob
+            .create(accountName, accountKey, containerName)
+            .listAllBlobs();
+    }
+
+    static readBlobMetaData(accountName, accountKey, containerName, blobName) {
+        return AzureBlob
+            .create(accountName, accountKey, containerName)
+            .getBlobMetaData(blobName);
+    }
+
+    static async loadObj(accountName, accountKey, containerName, blobName) {
+        return AzureBlob
+            .create(accountName, accountKey, containerName)
+            .readBlob(blobName)
+            .then(text => {
+                let obj = JSON.parse(text)
+                return obj;
+            });
+    }
 }
 
 module.exports = {
