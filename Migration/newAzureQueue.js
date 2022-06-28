@@ -5,7 +5,6 @@ const { QueueClient, QueueServiceClient, StorageSharedKeyCredential } = require(
 
 //in the new @azure/storage-queue SDK, instances of QueueClient would be used for queue operations.
 
-//! maybe just use the logic in anotherWay.js instead :-)
 
 //? do we want a class for the ServiceClient also?
 
@@ -75,7 +74,7 @@ class AzureQueue {
         } catch (error) {
             throw new Error(error);
         }
-    } //! this works for deleting the message on top... but for specifying which message to delete, we may need to refactor slightly
+    } //! this works for deleting the message on top... but for specifying which message to delete, we may need to refactor slightly... or handle that locally.
 
     // async getCount() {
     //? do we really need this method in this class? bc was only needed for peeking which we now can do without a count with new SDK
@@ -104,10 +103,22 @@ class AzureQueue {
         }
     }
 
+    /**
+     * 
+     * @returns {Promise<object>} 
+     *   returned object like:
+     * {
+     * insertedOn: 2022-06-27T19:17:58.000Z,        
+     * expiresOn: 2022-07-04T19:17:58.000Z,        
+     * popReceipt: 'AgAAAAMAAAAAAAAAERIsZXCK2AE=', 
+     * nextVisibleOn: 2022-06-27T21:53:54.000Z,    
+     * dequeueCount: 1,
+     * messageText: 'eyJyZXF1ZXN0SWQiOiJlNTdlMDQ0...'
+     * }
+     */
     async peekMessageData() {
         try {
             let messageResponse = await this.queueSvc.receiveMessages();
-            //By default, a *single* message is retrieved from the queue with above operation.
             return messageResponse.receivedMessageItems[0];
         } catch (error) {
             throw new Error(error);
