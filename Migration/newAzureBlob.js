@@ -76,8 +76,8 @@ class AzureBlob {
         }
     }
 
-// in old SDK, there was no built-in way to handle pagination when listing blobs in a container. Users had to use continuationToken to get the next page of result then retrieve the items.
-//In the new SDK we return a PagedAsyncIterableIterator that handles the details of pagination internally, simplifying the work of iteration.
+    // in old SDK, there was no built-in way to handle pagination when listing blobs in a container. Users had to use continuationToken to get the next page of result then retrieve the items.
+    //In the new SDK we return a PagedAsyncIterableIterator that handles the details of pagination internally, simplifying the work of iteration.
     async listAllBlobs() {
         try {
             let blobItems = [];
@@ -88,6 +88,24 @@ class AzureBlob {
                 blobItem = await iterator.next();
             }
             return blobItems;
+        } catch (error) {
+            throw new Error(error);
+        }
+    }
+
+    async exists() {
+        try {
+            let existence = await this.blobSvc.exists();
+            return existence;
+        } catch (error) {
+            return false;
+        }
+    }
+
+    async createContainerIfNotExists() {
+        try {
+            let responseData = await this.blobSvc.createIfNotExists();
+            return responseData;
         } catch (error) {
             throw new Error(error);
         }

@@ -11,7 +11,33 @@ const accountName = process.env.ACCOUNT_NAME;
 const accountKey = process.env.ACCOUNT_KEY;
 
 const azureQueue = new AzureQueue('dev-queue', accountName, accountKey);
-const azureBlob = new AzureBlob(accountName, accountKey, 'dev-blobs');
+const azureBlob = new AzureBlob(accountName, accountKey, 'dev2');
+
+
+async function createIfNotExists() {
+    try {
+        let result = await azureBlob.createContainerIfNotExists();
+        // console.log(result) // debug
+        return result;
+    } catch (error) {
+        console.log(error)
+    }
+}
+async function checkExistence() {
+    try {
+        let result = await azureBlob.exists();
+        // console.log(result) // debug
+        return result;
+    } catch (error) {
+        console.log(error)
+    }
+}
+checkExistence().then(result => {
+    console.log(result)
+}).catch(err => {
+    console.log(err)
+})
+
 
 async function deleteBlob() {
     try {
@@ -37,11 +63,11 @@ async function listBlobs() {
         console.log(error)
     }
 }
-listBlobs().then(result => {
-    console.log(result)
-}).catch(err => {
-    console.log(err)
-})
+// listBlobs().then(result => {
+//     console.log(result)
+// }).catch(err => {
+//     console.log(err)
+// })
 
 
 async function writeToBlob() {
