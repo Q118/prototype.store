@@ -1,4 +1,4 @@
-const { ContainerClient, StorageSharedKeyCredential, BlockBlobClient } = require("@azure/storage-blob");
+const { ContainerClient, StorageSharedKeyCredential } = require("@azure/storage-blob");
 
 async function streamToBuffer(readableStream) {
     return new Promise((resolve, reject) => {
@@ -46,27 +46,30 @@ class AzureBlob {
      */
     async writeBlob(blobName, blobContent) {
         try {
-            // await this.blobSvc.create();
-            let blockBlob = await this.blobSvc.getBlockBlobClient(blobName);
-            let responseData = await blockBlob.upload(blobContent, blobContent.length);
-            return responseData;
+            let blockBlobUploadRes = await this.blobSvc.getBlockBlobClient(blobName).upload(blobContent, blobContent.length);
+            return blockBlobUploadRes;
         } catch (error) {
             throw new Error(error);
         }
     }
-    // * const blockBlobClient = containerClient.getBlockBlobClient("<blob name>");
-    // * const uploadBlobResponse = await blockBlobClient.upload(content, content.length);
+    
     async readBlob(blobName) {
         try {
             let responseData = await this.blobSvc.getBlockBlobClient(blobName).download();
-
-
-            const downloaded = await streamToBuffer(responseData.readableStreamBody);
-
+            let downloaded = await streamToBuffer(responseData.readableStreamBody);
             return downloaded.toString();
         } catch (error) {
             throw new Error(error);
 
+        }
+    }
+
+    async getBlobMetaData(blobName) {
+        try {
+            let responseData = await this.blobSvc.getBlockBlobClient(blobName).getProperties();
+            return responseData;
+        } catch (error) {
+            throw new Error(error);
         }
     }
 

@@ -15,7 +15,7 @@ const azureBlob = new AzureBlob(accountName, accountKey, 'dev2');
 
 async function writeToBlob() {
     try {
-        let result = await azureBlob.writeBlob('test.json', '{"test": "foo"}');
+        let result = await azureBlob.writeBlob('test2.json', '{"test": "foo2"}');
         // console.log(result) // debug
         return result;
     } catch (error) {
@@ -30,7 +30,7 @@ async function writeToBlob() {
 
 async function readBlob() {
     try {
-        let result = await azureBlob.readBlob('test.json');
+        let result = await azureBlob.readBlob('test2.json');
         // console.log(result) // debug
         return result;
     } catch (error) {
