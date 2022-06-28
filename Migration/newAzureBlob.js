@@ -20,18 +20,12 @@ class AzureBlob {
             containerUrl,
             new StorageSharedKeyCredential(accountName, accountKey)
         );
-
-        // this.blockBlob = new BlockBlobClient(
-        //     `${containerUrl}/${blobName}`,
-        //     new StorageSharedKeyCredential(accountName, accountKey)
-        // );
-
         this.containerName = containerName;
         this.writeBlob = this.writeBlob.bind(this);
         this.readBlob = this.readBlob.bind(this);
-        // this.deleteBlob = this.deleteBlob.bind(this);
+        this.deleteBlob = this.deleteBlob.bind(this);
         // this.listBlobs = this.listBlobs.bind(this);
-        // this.listAllBlobs = this.listAllBlobs.bind(this);
+        this.listAllBlobs = this.listAllBlobs.bind(this);
         // this.listBlobsInFolder = this.listBlobsInFolder.bind(this);
         // this.listAllBlobsInFolder = this.listAllBlobsInFolder.bind(this);
         // this.exists = this.exists.bind(this);
@@ -52,7 +46,7 @@ class AzureBlob {
             throw new Error(error);
         }
     }
-    
+
     async readBlob(blobName) {
         try {
             let responseData = await this.blobSvc.getBlockBlobClient(blobName).download();
@@ -82,7 +76,22 @@ class AzureBlob {
         }
     }
 
-
+// in old SDK, there was no built-in way to handle pagination when listing blobs in a container. Users had to use continuationToken to get the next page of result then retrieve the items.
+//In the new SDK we return a PagedAsyncIterableIterator that handles the details of pagination internally, simplifying the work of iteration.
+    async listAllBlobs() {
+        try {
+            let blobItems = [];
+            const iterator = this.blobSvc.listBlobsFlat();
+            let blobItem = await iterator.next();
+            while (!blobItem.done) {
+                blobItems.push(blobItem.value);
+                blobItem = await iterator.next();
+            }
+            return blobItems;
+        } catch (error) {
+            throw new Error(error);
+        }
+    }
 
 
 

@@ -1,4 +1,4 @@
-/** This file to test
+/** This file to TEST
  * the methods 
  * of newQueue.js & newBlob.js
 */
@@ -11,7 +11,7 @@ const accountName = process.env.ACCOUNT_NAME;
 const accountKey = process.env.ACCOUNT_KEY;
 
 const azureQueue = new AzureQueue('dev-queue', accountName, accountKey);
-const azureBlob = new AzureBlob(accountName, accountKey, 'dev2');
+const azureBlob = new AzureBlob(accountName, accountKey, 'dev-blobs');
 
 async function deleteBlob() {
     try {
@@ -22,12 +22,26 @@ async function deleteBlob() {
         console.log(error)
     }
 }
-deleteBlob().then(result => {
+// deleteBlob().then(result => {
+//     console.log(result)
+// }).catch(err => {
+//     console.log(err)
+// })
+
+async function listBlobs() {
+    try {
+        let result = await azureBlob.listAllBlobs();
+        // console.log(result) // debug
+        return result;
+    } catch (error) {
+        console.log(error)
+    }
+}
+listBlobs().then(result => {
     console.log(result)
 }).catch(err => {
     console.log(err)
 })
-
 
 
 async function writeToBlob() {
