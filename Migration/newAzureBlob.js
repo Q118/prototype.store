@@ -73,6 +73,14 @@ class AzureBlob {
         }
     }
 
+    async deleteBlob(blobName) {
+        try {
+            let responseData = await this.blobSvc.getBlockBlobClient(blobName).delete();
+            return responseData;
+        } catch (error) {
+            throw new Error(error);
+        }
+    }
 
 
 

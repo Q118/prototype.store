@@ -1,6 +1,6 @@
 /** This file to test
  * the methods 
- * of newQueue.js 
+ * of newQueue.js & newBlob.js
 */
 
 const { AzureQueue } = require('./newAzureQueue.js');
@@ -12,6 +12,23 @@ const accountKey = process.env.ACCOUNT_KEY;
 
 const azureQueue = new AzureQueue('dev-queue', accountName, accountKey);
 const azureBlob = new AzureBlob(accountName, accountKey, 'dev2');
+
+async function deleteBlob() {
+    try {
+        let result = await azureBlob.deleteBlob('test2.json');
+        console.log("blob deleted successfully")
+        return result;
+    } catch (error) {
+        console.log(error)
+    }
+}
+deleteBlob().then(result => {
+    console.log(result)
+}).catch(err => {
+    console.log(err)
+})
+
+
 
 async function writeToBlob() {
     try {
@@ -37,11 +54,11 @@ async function readBlob() {
         console.log(error)
     }
 }
-readBlob().then(result => {
-    console.log(result)
-}).catch(err => {
-    console.log(err)
-})
+// readBlob().then(result => {
+//     console.log(result)
+// }).catch(err => {
+//     console.log(err)
+// })
 
 
 async function readQueue() {
