@@ -333,6 +333,16 @@ class AzureTable {
             throw new Error(error);
         }
     }
+    // new SDK allows deleting an entity with just the partitionKey and rowKey
+    async deleteEntityByKey(partitionKey, rowKey) {
+        try {
+            let dataResponse = await this.tableSvc.deleteEntity(partitionKey, rowKey);
+            console.log(`Entity deleted: ${partitionKey}`)
+            return dataResponse;
+        } catch (error) {
+            throw new Error(error);
+        }
+    }
 
 
 

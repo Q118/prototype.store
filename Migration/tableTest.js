@@ -33,7 +33,8 @@ async function main() {
     // okay TO MERGE WE NEED TO USE updateEntity()
     // no use UPSERT, which inserts if the entity doesn't exist or updates the existing one
     // await tableClient.insertOrReplaceEntity(task1);
-    return await tableClient.retrieveObjById("1111");
+    // return await tableClient.retrieveObjById("1111");
+    return await tableClient.deleteEntityByKey("1111", "");
 };
 
 /**
