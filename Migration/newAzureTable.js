@@ -9,7 +9,7 @@
 // ? Azure tableStruct is used only in the constructor of AzureTable..not actually used anywhere else.. but I think will still need it to be here to use... well lets grok the migration first and see...
 // so actually may not need to really change much to the struct class bc it doesnt use the SDK really.. its built with js and lodash
 
-const { TableClient, AzureNamedKeyCredential } = require("@azure/data-tables");
+const { TableClient, AzureNamedKeyCredential, TableEntity } = require("@azure/data-tables");
 // const uuid = require('uuid').v4;
 // const _ = require('lodash');
 
@@ -33,7 +33,7 @@ const PROPERTY_TYPES = {
 //So a Map is an insert-ordered key-value store for Javascript, which additionally allows mapping any value to any value, instead of restricting keys to be strings. This can greatly simplify some code where ordering is important, or where objects or other complex data types need to be associated with other data.
 
 
-
+// #region
 // class AzureTableStruct {
 //     //keeping this relatively the same other than remove entGen.... 
 //     //no actually need to change throughout bc comments above..
@@ -191,6 +191,7 @@ const PROPERTY_TYPES = {
 //     }
 
 // }
+// #endregion
 
 class AzureTable {
     constructor(accountName, accountKey, tableName) {
@@ -205,10 +206,12 @@ class AzureTable {
 
 
 
+
         // this.tableStruct = new AzureTableStruct();
 
         this.init = this.init.bind(this);
-        // this.insertOrReplaceEntity = this.insertOrReplaceEntity.bind(this);
+        this.insertOrReplaceEntity = this.insertOrReplaceEntity.bind(this);
+
         // this.retrieveEntityByKey = this.retrieveEntityByKey.bind(this);
         // this.deleteEntityByKey = this.deleteEntityByKey.bind(this);
         // this.execQueryRaw = this.execQueryRaw.bind(this);
@@ -226,8 +229,14 @@ class AzureTable {
         }
     }
 
+    /**
+     * @param {TableEntity} entity 
+     */
     async insertOrReplaceEntity(entity) {
         try {
+            if (entity.PartitionKey === undefined || entity.RowKey === undefined) {
+                throw new Error(`PartitionKey and RowKey are required`);
+            }
             let responseData = await this.tableSvc.upsertEntity(entity, "Replace");
             console.log(`Entity replaced/inserted`);
             return responseData;
@@ -235,9 +244,14 @@ class AzureTable {
             throw new Error(error);
         }
     }
-
+    /**
+     * @param {TableEntity} entity 
+     */
     async insertOrMergeEntity(entity) {
         try {
+            if (entity.PartitionKey === undefined || entity.RowKey === undefined) {
+                throw new Error(`PartitionKey and RowKey are required`);
+            }
             let responseData = await this.tableSvc.upsertEntity(entity, "Merge");
             console.log(`Entity merged/inserted`);
             return responseData;
@@ -246,7 +260,38 @@ class AzureTable {
         }
     }
 
+    async insertOrReplaceObj(obj) {
+        try {
+            if (obj.PartitionKey === undefined || obj.RowKey === undefined) {
+                throw new Error(`PartitionKey and RowKey are required`);
+            }
+            let responseData = await this.insertOrReplaceEntity(obj);
+            console.log(`Object replaced/inserted`);
+            return responseData;
+        } catch (error) {
+            throw new Error(error);
+        }
+    }
+
+    async insertOrMergeObj(obj) {
+        try {
+            if (obj.PartitionKey === undefined || obj.RowKey === undefined) {
+                throw new Error(`PartitionKey and RowKey are required`);
+            }
+            let responseData = await this.insertOrMergeEntity(obj);
+            console.log(`Object merged/inserted`);
+            return responseData;
+        } catch (error) {
+            throw new Error(error);
+        }
+    }
+
 }
+
+
+
+// yEA I THINK WE can do it without the struct class, can try to just include inside these methods like what he tried to include in his methods that have the tableStuct
+
 
 module.exports = {
     AzureTable,
