@@ -117,7 +117,6 @@ class AzureBlob {
         return new AzureBlob(accountName, accountKey, containerName);
     }
 
-
     static readBlob(accountName, accountKey, containerName, blobName) {
         return AzureBlob
             .create(accountName, accountKey, containerName)
