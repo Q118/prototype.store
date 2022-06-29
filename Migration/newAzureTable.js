@@ -344,6 +344,20 @@ class AzureTable {
         }
     }
 
+    async execQueryRaw(query) {
+        try {
+            let queryResults = this.tableSvc.listEntities({
+                queryOptions: { filter: odata(query) }
+                // queryOptions: { filter: odata`amount le 3660` }
+            });
+            for await (const entity of queryResults) {
+                console.log(entity);
+            }
+            return queryResults;
+        } catch (error) {
+            throw new Error(error);
+        }
+    }
 
 
 }

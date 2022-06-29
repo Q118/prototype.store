@@ -3,8 +3,8 @@
  * and the little nuences from the migration
  */
 
-// const { TableClient, AzureNamedKeyCredential } = require("@azure/data-tables");
-const tableName = "devTester";
+// const { odata, TableClient, AzureNamedKeyCredential } = require("@azure/data-tables");
+const tableName = "devTest";
 const tablesEndpoint = "https://accsrusdev.table.core.windows.net/";
 const { AzureTable } = require("./newAzureTable");
 
@@ -26,26 +26,39 @@ const task1 = {
 };
 
 
+let modelOptions = {
+    bigAmount: null
+}
+
 async function main() {
     // await tableClient.init();
     // await tableClient.createEntity(task1); // lets see if we can merge stuff also...
-    // await tableClient.updateEntity(task1);
+    // await tableClient.upsertEntity(task1);
     // okay TO MERGE WE NEED TO USE updateEntity()
     // no use UPSERT, which inserts if the entity doesn't exist or updates the existing one
     // await tableClient.insertOrReplaceEntity(task1);
     // return await tableClient.retrieveObjById("1111");
-    return await tableClient.deleteEntityByKey("1111", "");
+    // return await tableClient.deleteEntityByKey("1111", "");
+
+    let queryObj = {
+        text: "amount ge 3660"
+    }
+
+    return await tableClient.execQueryRaw("amount ge 3660");
+
+//!!! HERE is HOW WE DO THE QUERYING
+//! use this logic in the newAzureTable.js file
+    // const priceListResults = tableClient.listEntities({
+    //     queryOptions: { filter: odata`amount le 3660` }
+    // });
+    // for await (const product of priceListResults) {
+    //     console.log(`${product.description}: ${product.amount}`);
+    // }
+
 };
 
-/**
-     * Adds an upsert action to the transaction, which inserts if the entity doesn't exist or updates the existing one
-     * @param entity - entity to upsert
-     * @param updateMode - update mode
-     */
-// upsertEntity<T extends object = Record<string, unknown>>(entity: TableEntity<T>, updateMode?: UpdateMode): void;
 
-
-main().then((res) => { 
+main().then((res) => {
     console.log(res);
 }).catch((err) => {
     console.log(err);
