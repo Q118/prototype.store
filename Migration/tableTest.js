@@ -15,25 +15,25 @@ const tableClient = new AzureTable(
 
 // Creates the table with `tableName` if it doesn't exist
 const task1 = {
-    partitionKey: "12431254123",
+    partitionKey: "1111",
     rowKey: "",
     description: "!!! out the trash",
     completed: true,
     amount: 3659,
     bigAmount: BigInt(43351435454115235),
-        // above creates a Type of Int64 in table
+    // above creates a Type of Int64 in table
     dueDate: new Date(2015, 6, 20)
 };
 
 
 async function main() {
-    await tableClient.init();
+    // await tableClient.init();
     // await tableClient.createEntity(task1); // lets see if we can merge stuff also...
     // await tableClient.updateEntity(task1);
     // okay TO MERGE WE NEED TO USE updateEntity()
-// no use UPSERT, which inserts if the entity doesn't exist or updates the existing one
-    await tableClient.insertOrMergeEntity(task1);
-
+    // no use UPSERT, which inserts if the entity doesn't exist or updates the existing one
+    // await tableClient.insertOrReplaceEntity(task1);
+    return await tableClient.retrieveObjById("1111");
 };
 
 /**
@@ -43,4 +43,9 @@ async function main() {
      */
 // upsertEntity<T extends object = Record<string, unknown>>(entity: TableEntity<T>, updateMode?: UpdateMode): void;
 
-main().catch(console.error);
+
+main().then((res) => { 
+    console.log(res);
+}).catch((err) => {
+    console.log(err);
+});

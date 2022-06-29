@@ -9,7 +9,7 @@
 // ? Azure tableStruct is used only in the constructor of AzureTable..not actually used anywhere else.. but I think will still need it to be here to use... well lets grok the migration first and see...
 // so actually may not need to really change much to the struct class bc it doesnt use the SDK really.. its built with js and lodash
 
-const { TableClient, AzureNamedKeyCredential, TableEntity } = require("@azure/data-tables");
+const { TableClient, AzureNamedKeyCredential, TableEntity, odata } = require("@azure/data-tables");
 // const uuid = require('uuid').v4;
 // const _ = require('lodash');
 
@@ -230,11 +230,13 @@ class AzureTable {
     }
 
     /**
-     * @param {TableEntity} entity 
+
      */
     async insertOrReplaceEntity(entity) {
+        console.log("!")
+        console.log(entity.partitionKey)
         try {
-            if (entity.PartitionKey === undefined || entity.RowKey === undefined) {
+            if (entity.partitionKey === undefined || entity.rowKey === undefined) {
                 throw new Error(`PartitionKey and RowKey are required`);
             }
             let responseData = await this.tableSvc.upsertEntity(entity, "Replace");
@@ -249,7 +251,7 @@ class AzureTable {
      */
     async insertOrMergeEntity(entity) {
         try {
-            if (entity.PartitionKey === undefined || entity.RowKey === undefined) {
+            if (entity.partitionKey === undefined || entity.rowKey === undefined) {
                 throw new Error(`PartitionKey and RowKey are required`);
             }
             let responseData = await this.tableSvc.upsertEntity(entity, "Merge");
@@ -262,7 +264,7 @@ class AzureTable {
 
     async insertOrReplaceObj(obj) {
         try {
-            if (obj.PartitionKey === undefined || obj.RowKey === undefined) {
+            if (obj.partitionKey === undefined || obj.rowKey === undefined) {
                 throw new Error(`PartitionKey and RowKey are required`);
             }
             let responseData = await this.insertOrReplaceEntity(obj);
@@ -275,7 +277,7 @@ class AzureTable {
 
     async insertOrMergeObj(obj) {
         try {
-            if (obj.PartitionKey === undefined || obj.RowKey === undefined) {
+            if (obj.partitionKey === undefined || obj.rowKey === undefined) {
                 throw new Error(`PartitionKey and RowKey are required`);
             }
             let responseData = await this.insertOrMergeEntity(obj);
@@ -285,6 +287,54 @@ class AzureTable {
             throw new Error(error);
         }
     }
+
+    /**
+     * 
+     * @param {string} partitionKey 
+     * @param {string} rowKey 
+     */
+    async retrieveEntityByKey(partitionKey, rowKey) {
+        try {
+            let responseData = await this.tableSvc.getEntity(partitionKey, rowKey);
+            console.log(`Entity retrieved`);
+            return responseData;
+        } catch (error) {
+            throw new Error(error);
+        }
+    }
+
+    async retrieveObjByKey(partitionKey, rowKey) {
+        try {
+            let responseData = await this.retrieveEntityByKey(partitionKey, rowKey);
+            console.log(`Object retrieved`);
+            return responseData;
+        } catch (error) {
+            throw new Error(error);
+        }
+    }
+
+    // old SDK querying a table didn't provide a built in way to handle pagination and we had to use continuationToken
+    // new one, we return a PagedAsyncIterableIterator that handles the details of pagination internally, simplifying the task of iteration
+
+    async retrieveObjById(id) {
+        try {
+            //lists all entities with PartitionKey = id
+            const listResults = this.tableSvc.listEntities({
+                queryOptions: { filter: odata`PartitionKey eq ${id}` }
+            });
+            let entities = [];
+            for await (const entity of listResults) {
+                entities.push(entity);
+            };
+            if (entities.length === 0) return undefined;
+            if (entities.length === 1) return entities[0];
+            return entities;
+        } catch (error) {
+            throw new Error(error);
+        }
+    }
+
+
 
 }
 

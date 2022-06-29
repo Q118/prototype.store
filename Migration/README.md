@@ -7,4 +7,5 @@ so start with a copy, then change it up, logic by logic...
 
 # TABLE MIGRATION
 - woah okay so through testing and stuff, I have realized and confrimed that a table can be created and  structured by simply providing the values AS THEY ARE and the sdk knows how to represent them in the table... so I can just use the values as they are and the sdk will do the rest... and that means that the new tableStruct class will be a lot smaller and less lines of code..
-<!-- ! it will work as PartitionKEy OR partitionKey...? -->
+<!--it will work as PartitionKEy OR partitionKey...? -->
+<!-- ! NO MORE CAPITALIZING THE FIRST letter -->
