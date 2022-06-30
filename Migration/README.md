@@ -20,3 +20,5 @@ so start with a copy, then change it up, logic by logic...
         console.log(`${product.description}: ${product.amount}`);
     }
 ```
+
+<!-- TODO: will eventually need to update to SiteUsers and RuleSets and other models especially for parts like selectBYusername or ID... bc querying is different with new SDK... -->

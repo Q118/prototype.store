@@ -37,17 +37,12 @@ async function main() {
     // okay TO MERGE WE NEED TO USE updateEntity()
     // no use UPSERT, which inserts if the entity doesn't exist or updates the existing one
     // await tableClient.insertOrReplaceEntity(task1);
-    // return await tableClient.retrieveObjById("1111");
+    return await tableClient.retrieveObjById("1111");
     // return await tableClient.deleteEntityByKey("1111", "");
 
-    let queryObj = {
-        text: "amount ge 3660"
-    }
+    // return await tableClient.execQueryRaw("amount ge 3660");
 
-    return await tableClient.execQueryRaw("amount ge 3660");
 
-//!!! HERE is HOW WE DO THE QUERYING
-//! use this logic in the newAzureTable.js file
     // const priceListResults = tableClient.listEntities({
     //     queryOptions: { filter: odata`amount le 3660` }
     // });

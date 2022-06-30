@@ -316,19 +316,27 @@ class AzureTable {
     // old SDK querying a table didn't provide a built in way to handle pagination and we had to use continuationToken
     // new one, we return a PagedAsyncIterableIterator that handles the details of pagination internally, simplifying the task of iteration
 
+    /**
+     * Retrieve an entity by PK
+     * @returns array of entities, single entity, or undefined if no entities found
+     */
     async retrieveObjById(id) {
         try {
-            //lists all entities with PartitionKey = id
-            const listResults = this.tableSvc.listEntities({
+            //lists all entities where PartitionKey === id
+            const queryResults = this.tableSvc.listEntities({
                 queryOptions: { filter: odata`PartitionKey eq ${id}` }
             });
-            let entities = [];
-            for await (const entity of listResults) {
-                entities.push(entity);
-            };
-            if (entities.length === 0) return undefined;
-            if (entities.length === 1) return entities[0];
-            return entities;
+            // let entities = [];
+            // for await (const entity of queryResults) {
+            //     entities.push(entity);
+            // };
+            // if (entities.length === 0) return undefined;
+            // if (entities.length === 1) return entities[0];
+
+            return await AzureTable.convertEntity(queryResults);
+
+
+            // return entities;
         } catch (error) {
             throw new Error(error);
         }
@@ -344,20 +352,59 @@ class AzureTable {
         }
     }
 
+    /**
+     * Executes a raw, Azure Table Storage query
+     * @param {string} query
+     * @returns array of entities, single entity, or undefined if no entities found
+     */
     async execQueryRaw(query) {
         try {
             let queryResults = this.tableSvc.listEntities({
                 queryOptions: { filter: odata(query) }
                 // queryOptions: { filter: odata`amount le 3660` }
             });
-            for await (const entity of queryResults) {
-                console.log(entity);
-            }
-            return queryResults;
+            // let entities = [];
+            // for await (const entity of queryResults) {
+            //     entities.push(entity);
+            // }
+            // if (entities.length === 0) return undefined;
+            // if (entities.length === 1) return entities[0];
+            
+            return await AzureTable.convertEntity(queryResults);
+            
+            // return entities;
         } catch (error) {
             throw new Error(error);
         }
     }
+    //!! RETURN HERE.. figure out the differences between the old query methods and ASK CURT if you cant figure it out... then continue to implement them...
+
+
+
+    /**
+     * Static Functions
+     */
+
+    /**
+     * @param {PagedAsyncIterableIterator} queryResults
+     * 
+     */
+    static async convertEntity(queryResults) {
+        let entities = [];
+        for await (const entity of queryResults) {
+            entities.push(entity);
+        }
+        if (entities.length === 0) return undefined;
+        if (entities.length === 1) return entities[0];
+        return entities;
+    }
+
+
+
+
+
+
+
 
 
 }
