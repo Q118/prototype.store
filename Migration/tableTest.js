@@ -4,7 +4,7 @@
  */
 
 // const { odata, TableClient, AzureNamedKeyCredential } = require("@azure/data-tables");
-const tableName = "devTest";
+const tableName = "devTester1";
 const tablesEndpoint = "https://accsrusdev.table.core.windows.net/";
 const { AzureTable } = require("./newAzureTable");
 
@@ -21,6 +21,7 @@ const task1 = {
     completed: true,
     amount: 3659,
     bigAmount: BigInt(43351435454115235),
+    foo: { value: "12345", type: "Int64" },
     // above creates a Type of Int64 in table
     dueDate: new Date(2015, 6, 20)
 };
@@ -32,15 +33,16 @@ let modelOptions = {
 
 async function main() {
     // await tableClient.init();
-    // await tableClient.createEntity(task1); // lets see if we can merge stuff also...
-    // await tableClient.upsertEntity(task1);
+
     // okay TO MERGE WE NEED TO USE updateEntity()
     // no use UPSERT, which inserts if the entity doesn't exist or updates the existing one
-    // await tableClient.insertOrReplaceEntity(task1);
-    return await tableClient.retrieveObjById("1111");
+    await tableClient.insertOrReplaceEntity(task1);
+    
+    
+    // return await tableClient.retrieveObjById("1111");
     // return await tableClient.deleteEntityByKey("1111", "");
 
-    // return await tableClient.execQueryRaw("amount ge 3660");
+    // return await tableClient.execQuery("amount ge 3660");
 
 
     // const priceListResults = tableClient.listEntities({
