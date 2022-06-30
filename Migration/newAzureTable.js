@@ -11,7 +11,7 @@
 const { TableClient, AzureNamedKeyCredential, TableEntity, odata } = require("@azure/data-tables");
 
 // const uuid = require('uuid').v4;
-// const _ = require('lodash');
+const _ = require('lodash');
 
 //! use example: https://github.com/Azure/azure-sdk-for-js/blob/main/sdk/tables/data-tables/samples/v12/javascript/workingWithInt64.js
 //! to set up the structure class...
@@ -49,10 +49,10 @@ class AzureTableStruct {
         this.addDateTime = this.addDateTime.bind(this);
         this.addInt64 = this.addInt64.bind(this);
         this.addString = this.addString.bind(this);
-        // this.genEntityValueByPropDef = this.genEntityValueByPropDef.bind(this);
-        // this.genEntityValueByPropName = this.genEntityValueByPropName.bind(this);
-        // this.getEntityFromObj = this.getEntityFromObj.bind(this);
-        // this.getObjFromEntity = this.getObjFromEntity.bind(this);
+        this.genEntityValueByPropDef = this.genEntityValueByPropDef.bind(this);
+        this.genEntityValueByPropName = this.genEntityValueByPropName.bind(this);
+        this.getEntityFromObj = this.getEntityFromObj.bind(this);
+        this.getObjFromEntity = this.getObjFromEntity.bind(this);
     }
 
     static createPropDef(entityPropName, propType, objPropName = undefined) {
@@ -87,10 +87,8 @@ class AzureTableStruct {
         return this.add(name, PROPERTY_TYPES.INT64, objPropName);
     }
 
-    // haven't actually set any rows yet..
-    //? so this is trying to get the name of the column in the table
     getObjValueByPropDef(obj, propDef, defaultValue = undefined) {
-        let objValue = obj[propDef.objPropName]; 
+        let objValue = obj[propDef.objPropName];
         // Set a default if undefined and the default is given
         if (objValue === undefined && defaultValue !== undefined) objValue = defaultValue;
         return objValue;// e.g. 'partitionKey'
@@ -99,7 +97,6 @@ class AzureTableStruct {
     genEntityValueByPropDef(obj, propDef, defaultValue = undefined) {
         let entityValue = undefined;
         let objValue = this.getObjValueByPropDef(obj, propDef, defaultValue);
-
         if (propDef) {
             switch (propDef.propType) {
                 case PROPERTY_TYPES.STRING:
@@ -134,8 +131,47 @@ class AzureTableStruct {
         } else {
             throw new Error(`Property definition not found.`);
         }
-        return entityValue; // value of the entity, example: 'true', actual value to be stored in the table
+        return entityValue; // value of the entity, example: 'true', its the actual value to be stored in the table
+    }
 
+    genEntityValueByPropName(obj, propName, defaultValue = undefined) {
+        let propDef = this.propDefs.get(propName);
+        return this.genEntityValueByPropDef(obj, propDef, defaultValue); // returns value of the entity
+    }
+
+    getEntityFromObj(obj) {
+        let entity = {};
+        function buildEntity(propDef) {
+            entity[propDef.entityPropName] = this.genEntityValueByPropDef(obj, propDef); 
+        };  //?? huh??????????????????? HOW/WHY is this working?
+        this.propDefs.forEach(buildEntity.bind(this));
+        return entity;
+    }
+
+    /**
+     * Creates an entity with only the properties
+     * that exist in the object.
+     * @param {*} obj 
+     */
+    getMergeEntityFromObj(obj) {
+        let entity = {};
+        function buildEntity(propDef) {
+            if (_.has(obj, propDef.objPropName)) {
+                entity[propDef.entityPropName] = this.genEntityValueByPropDef(obj, propDef);
+            }
+        };
+        this.propDefs.forEach(buildEntity.bind(this));
+        return entity;
+    }
+
+    getObjFromEntity(entity) {
+        let obj = {};
+        this.propDefs.forEach(function (propDef) {
+            if (_.has(entity, propDef.entityPropName)) {
+                obj[propDef.objPropName] = entity[propDef.entityPropName].value;
+            }
+        });
+        return obj;
     }
 
 }
@@ -376,4 +412,5 @@ class AzureTable {
 
 module.exports = {
     AzureTable,
+    AzureTableStruct,
 }
