@@ -4,7 +4,7 @@
  */
 
 // const { odata, TableClient, AzureNamedKeyCredential } = require("@azure/data-tables");
-const tableName = "devTester1";
+const tableName = "devTester2";
 const tablesEndpoint = "https://accsrusdev.table.core.windows.net/";
 const { AzureTable } = require("./newAzureTable");
 
@@ -15,15 +15,15 @@ const tableClient = new AzureTable(
 
 // Creates the table with `tableName` if it doesn't exist
 const task1 = {
-    partitionKey: "1111",
+    partitionKey: "331111",
     rowKey: "",
     description: "!!! out the trash",
     completed: true,
     amount: 3659,
-    bigAmount: BigInt(43351435454115235),
-    foo: { value: "12345", type: "Int64" },
+    bigAmount: { value: "7897890", type: "Int64" },
+    amount: BigInt()
     // above creates a Type of Int64 in table
-    dueDate: new Date(2015, 6, 20)
+    dueDate: { value: "2019-08-22T07:00:00Z", type: "DateTime" },
 };
 
 
@@ -32,7 +32,10 @@ let modelOptions = {
 }
 
 async function main() {
-    // await tableClient.init();
+    
+    tableClient.tableStruct.addBoolean("completed2");
+    
+    await tableClient.init();
 
     // okay TO MERGE WE NEED TO USE updateEntity()
     // no use UPSERT, which inserts if the entity doesn't exist or updates the existing one

@@ -1,0 +1,105 @@
+// start
+{
+    "method": "POST",
+    "url": "/v1/guidelines/evaluateall?serverTiming",
+    "IP": "::1",
+    "machineName": "WSNA2180",
+    "headers": {
+        "x-api-user": "sr",
+        "x-api-key": "f432bde6-402e-41de-a4cb-67b722ed16ba92b68684-077e-49d0-8e57-e359c6e6018a",
+        "ocp-apim-subscription-key": "3d519c4fb57d42bb84505bfb8cc64099",
+        "cookie": "ARRAffinitySameSite=4d0bf8a034bef2a73d6df8e02094735bede3b37b4cdba30ad8d13592b30e385b",
+        "content-type": "application/json",
+        "user-agent": "PostmanRuntime/7.29.0",
+        "accept": "*/*",
+        "postman-token": "9d671f57-599d-4e8a-b239-e68c450b14e5",
+        "host": "localhost:8080",
+        "accept-encoding": "gzip, deflate, br",
+        "connection": "keep-alive",
+        "content-length": "1581"
+    }
+}
+
+//body
+{
+    "data": [
+        {
+            "type": "evaluationData",
+            "attributes": {
+                "validationPoint": "timeEntry",
+                "client": {
+                    "code": "1234"
+                },
+                "matter": {
+                    "code": "",
+                    "categoryCode": "",
+                    "typeCode": ""
+                },
+                "timeKeeper": {
+                    "id": "",
+                    "code": "",
+                    "fullName": "",
+                    "rankCode": "",
+                    "workGroup": ""
+                },
+                "timeEntry": {
+                    "id": "",
+                    "actionCode": "",
+                    "actionDescription": "",
+                    "isBillPrint": "",
+                    "billableStatus": "",
+                    "currencyCode": "",
+                    "isWorkingTimekeeper": "",
+                    "locationCode": "",
+                    "wipStatus": "",
+                    "transactionDate": "",
+                    "activityCode": "",
+                    "phaseCode": "",
+                    "taskCode": "",
+                    "phaseTaskCode": "",
+                    "hours": "",
+                    "amount": "",
+                    "narrative": "DEVGLRA",
+                    "taxType": "",
+                    "countryCode": ""
+                }
+            }
+        },
+        {
+            "type": "options",
+            "attributes": {
+                "showGuidelineEvaluations": true
+            }
+        }
+    ]
+}
+
+//result
+{
+    "headers": {
+        "x-powered-by": "Express",
+        "vary": "Origin, Accept-Encoding",
+        "access-control-expose-headers": "Server-Timing",
+        "cache-control": "private, no-cache, no-store, must-revalidate",
+        "expires": "-1",
+        "pragma": "no-cache",
+        "server-timing": "totl;dur=852.232, vald;dur=0.0909, proc;dur=852.0806, xfrm;dur=0.0481",
+        "content-type": "application/json; charset=utf-8",
+        "content-length": "189",
+        "etag": "W/\"bd-KdOC8XQNBTk6AHo880qPk5tRw1Q\""
+    },
+    "response": {
+        "data": {
+            "type": "evaluationResult",
+            "attributes": {
+                "evaluationStatus": "unknown",
+                "status": "unknown",
+                "triggeredRules": [],
+                "options": {
+                    "showGuidelineEvaluations": true
+                },
+                "guidelineEvaluations": []
+            }
+        }
+    }
+}

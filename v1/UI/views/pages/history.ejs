@@ -53,7 +53,7 @@
 
       <div id="request-headers" class="content">
         <pre>
-            <%= JSON.stringify(obj.REQUEST.Headers, undefined, 2) %>
+            <%= JSON.stringify(obj?.REQUEST?.Headers, undefined, 2) %>
         </pre>
       </div>
 
@@ -64,7 +64,7 @@
 
       <div id="blob-request-body" class="content">
         <pre>
-            <%= JSON.stringify(obj.REQUEST.Body, undefined, 2) %>
+            <%= JSON.stringify(obj?.REQUEST?.Body, undefined, 2) %>
         </pre>
       </div>
       <strong>RESPONSE</strong>
@@ -76,7 +76,7 @@
 
       <div id="response-headers" class="content">
         <pre>
-            <%= JSON.stringify(obj.RESPONSE.Headers, undefined, 2) %>
+            <%= JSON.stringify(obj?.RESPONSE?.Headers, undefined, 2) %>
         </pre>
       </div>
       <button type="button" class="collapsible">
@@ -85,7 +85,7 @@
       </button>
       <div id="blob-response-body" class="content">
         <pre>
-            <%= JSON.stringify(obj.RESPONSE.Body, undefined, 2) %>
+            <%= JSON.stringify(obj?.RESPONSE?.Body, undefined, 2) %>
         </pre>
       </div>
       <hr class="callDivider">

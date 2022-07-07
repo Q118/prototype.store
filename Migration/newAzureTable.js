@@ -94,36 +94,38 @@ class AzureTableStruct {
         return objValue;// e.g. 'partitionKey'
     }
 
+    // ref example for setting types: https://stack247.wordpress.com/2021/08/21/azure-data-table-query-in-typescript/ 
+
     genEntityValueByPropDef(obj, propDef, defaultValue = undefined) {
         let entityValue = undefined;
         let objValue = this.getObjValueByPropDef(obj, propDef, defaultValue);
         if (propDef) {
             switch (propDef.propType) {
                 case PROPERTY_TYPES.STRING:
-                    entityValue = { value: `${objValue}`, type: "string" };
+                    entityValue = { value: `${objValue}`, type: "String" };
                     break;
                 case PROPERTY_TYPES.INT64:
-                    entityValue = { value: `${objValue}`, type: "int64" };
+                    entityValue = { value: `${objValue}`, type: "Int64" };
                     break;
                 case PROPERTY_TYPES.DATETIME:
-                    entityValue = { value: `${objValue}`, type: "datetime" };
-                    // entityValue = new Date(objValue);
+                    entityValue = { value: `${objValue}`, type: "DateTime" };
+                    //? must be in ISO 8601 format (e.g. "2019-01-01T00:00:00.000Z")
                     break;
                 case PROPERTY_TYPES.BOOLEAN:
                     objValue = Boolean(objValue || false);
-                    entityValue = { value: `${objValue}`, type: "boolean" };
+                    entityValue = { value: `${objValue}`, type: "Boolean" };
                     break;
                 case PROPERTY_TYPES.INT32:
-                    entityValue = { value: `${objValue}`, type: "int32" };
+                    entityValue = { value: `${objValue}`, type: "Int32" };
                     break;
                 case PROPERTY_TYPES.BINARY:
-                    entityValue = { value: `${objValue}`, type: "binary" };
+                    entityValue = { value: `${objValue}`, type: "Binary" };
                     break;
                 case PROPERTY_TYPES.GUID:
-                    entityValue = { value: `${objValue}`, type: "guid" };
+                    entityValue = { value: `${objValue}`, type: "Guid" };
                     break;
                 case PROPERTY_TYPES.DOUBLE:
-                    entityValue = { value: `${objValue}`, type: "double" };
+                    entityValue = { value: `${objValue}`, type: "Double" };
                     break;
                 default:
                     throw new Error(`Unknown property type: ${propDef.propType}`);
@@ -142,9 +144,15 @@ class AzureTableStruct {
     getEntityFromObj(obj) {
         let entity = {};
         function buildEntity(propDef) {
-            entity[propDef.entityPropName] = this.genEntityValueByPropDef(obj, propDef); 
-        };  //?? huh??????????????????? HOW/WHY is this working?
+            entity[propDef.entityPropName] = this.genEntityValueByPropDef(obj, propDef);
+        };  //????????????????????? HOW/WHY is this working?
         this.propDefs.forEach(buildEntity.bind(this));
+        /*
+        let self = this;
+        this.propDefs.forEach((propDef) => {
+            entity[propDef.entityPropName] = self.genEntityValueByPropDef(obj, propDef);
+        });
+        */
         return entity;
     }
 
@@ -188,7 +196,7 @@ class AzureTable {
             new AzureNamedKeyCredential(accountName, accountKey)
         );
 
-        // this.tableStruct = new AzureTableStruct();
+        this.tableStruct = new AzureTableStruct();
         this.init = this.init.bind(this);
         this.insertOrReplaceEntity = this.insertOrReplaceEntity.bind(this);
         this.retrieveEntityByKey = this.retrieveEntityByKey.bind(this);
@@ -345,23 +353,37 @@ class AzureTable {
         }
     }
 
-    // async execQueryAll(query) {
-    //! come on back to this once i hace set up the struct class
-    //? kinda redundant here not sure if we need another method for this
-    //     try {
-    //         // let queryResults = await this.execQueryRaw(query)
+    async execQueryAll(query) {
+        try {
+            let all = [];
+            let results = await this.execQuery(query);
+            all.push(...results);
+            return all;
+        } catch (error) {
+            throw new Error(error)
+        }
+    }
+    
+    //TODO: fix above and below functions.. they need help
 
-    //         // return await AzureTable.convertEntityToObj(queryResults);
-    //     } catch (error) {
-    //         throw new Error(error)
-    //     }
-    //  }
+    async execQueryAllObj(query = undefined) {
+        try {
+            if (query === undefined) {
+                query = AzureTable.createQuery();
+                // `PartitionKey eq '${this.tableStruct.partitionKey}'`;
+                // select: '*',
+            }
+            let all = [];
+            let results = await this.execQuery(query);
+            all.push(...results);
+            return all;
+        } catch (error) {
+            throw new Error(error)
+        }
+    }
 
-    //? same with here? need to understand why/how we need it...
-    async execQueryAllObj() { }
 
-    //!! RETURN HERE.. figure out the differences between the old query methods and ASK CURT if you cant figure it out... then continue to implement them...
-    // ref examples: https://stack247.wordpress.com/2021/08/21/azure-data-table-query-in-typescript/
+
 
 
     /**
@@ -380,20 +402,17 @@ class AzureTable {
         if (entities.length === 0) return undefined;
         if (entities.length === 1) return entities[0];
         return entities;
-    }
+    }         
 
 
 
-    static createQuery(criteria) {
+    static createQuery(fields) {
         // deconstruct criteria
-
         // use select to only return the fields we want
-        let queryOptions;
+        let queryOptions;                                                                
         // {
-        //     queryOptions: {
-        //         filter: odata(string)
-        //         select: [<string>]
-        //     }
+        //      filter: odata(string)
+        //      select: [<string>]
         //}
         return queryOptions
     }

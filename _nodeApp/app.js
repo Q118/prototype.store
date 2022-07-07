@@ -2,6 +2,7 @@
 * @description This file will read queue messages, 
 * organize them with associated blobs,
 * and write them to columns in a table... asynchronously
+* TODO set up timer to run this file every x minutes
 */
 const AzureBlob = require('./lib/azureBlob').AzureBlob;
 const AzureQueue = require('./lib/azureQueue').AzureQueue;
@@ -10,8 +11,9 @@ const CallTracking = require('./models/CallTracking').CallTracking;
 const _ = require('lodash');
 require('dotenv').config({ path: __dirname + '/.env' });
 
-//TODO add config and tenantLOgic to this file, using below for now
+//TODO add config and tenantLOgic to this file, using below for now during dev
 const connectionString = process.env.AZURE_STORAGE_CONNECTION_STRING;
+
 const azureQueue = new AzureQueue(connectionString, "dev-queue");
 const azureBlob = new AzureBlob(connectionString, "dev-blobs");
 
@@ -213,7 +215,7 @@ async function dequeueMsg(id) {
 async function main() {
     //? keep going until all messages are used up? or nah.. handle that another way... bc can just call this whole file x amount of times with webJobs...
     // if we do end up looping, could use the 'count' to keep track of how many messages are left in the queue.
-    // while (...) {
+    // while (1 === 1) {
     try {
         let readResult = await readQueue();
         let objToAdd = await sortMessages(readResult);

@@ -171,5 +171,4 @@ class AzureQueue {
 
 module.exports = {
     AzureQueue,
-    // AzureServiceQueue
 }
