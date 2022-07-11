@@ -75,3 +75,13 @@ let reqList = [
 
 // root: .containerOf(reqList) the root is by default the whole screen...
 // rootMargin: "100px"
+
+//? how to give a default value to an objects property
+var emptyObj = {};
+const { nonExistingAttribute = "hfjkhfajks" } = emptyObj;
+// console.log(nonExistingAttribute); // hfjkhfajks
+
+let isHappyHour = '🍺';
+
+// Logical Operator
+isHappyHour = isHappyHour || '🍵'; // '🍺'

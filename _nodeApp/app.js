@@ -1,20 +1,25 @@
 /**
 * @description This file will read queue messages, 
 * organize them with associated blobs,
-* and write them to columns in a table... asynchronously
+* and write them to columns in a table asynchronously
 * TODO set up timer to run this file every x minutes in Azure Webjobs
 * ? will this be set up FOR EACH tenant OR for the whole app and logic to differentiate the tenants?
 */
+
+/** Lib */
 const AzureBlob = require('./lib/azureBlob').AzureBlob;
 const AzureQueue = require('./lib/azureQueue').AzureQueue;
-const CallTracking = require('./models/CallTracking').CallTracking;
+/** Models */
+const ApiRequest = require('./models/ApiRequest').ApiRequest;
+
+
 
 require('dotenv').config({ path: __dirname + '/.env' });
 
 //TODO get the string dynamically, using below for now during development.. 
-//waiting to talk to curt about design and question above before implementing further
+//waiting to talk to curt about design and question above before implementing further..the blob holds the connectionString for tenant... but starting out... knowing where to go
 const connectionString = process.env.AZURE_STORAGE_CONNECTION_STRING;
-// the blob holds the connectionString for tenant... but starting out... knowing where to go
+
 
 const azureQueue = new AzureQueue(connectionString, "dev-queue");
 const azureBlob = new AzureBlob(connectionString, "dev-blobs");
@@ -24,7 +29,7 @@ const azureBlob = new AzureBlob(connectionString, "dev-blobs");
 async function readQueue() {
     try {
         const result = await AzureQueue.peekMessages(connectionString, "dev-queue", 1);
-        // change this to use getMessages() instead...
+        //! change this to use getMessages() instead...
 
         // console.log(result) // debug
         let msgArr = [];
@@ -44,15 +49,14 @@ async function readQueue() {
 
 async function handleMessages(msgObj) {
     if (msgObj?.text === undefined) return;
+    let resultData;
     switch (msgObj?.text?.step) {
-        case "start":
-            return await handleStartAdd(msgObj);
-        case "body":
-            return await handleBodyAdd(msgObj);
-        case "result":
-            return await handleResultAdd(msgObj);
+        case "start": resultData = await handleStartAdd(msgObj); break;
+        case "body": resultData = await handleBodyAdd(msgObj); break;
+        case "result": resultData = await handleResultAdd(msgObj); break;
         default: throw new Error(`Unknown step in ${msgObj}`);
     }
+    await upsertApiRequest(resultData);
 }
 
 
@@ -70,6 +74,8 @@ async function getURL(reqId) {
     }
 }
 
+// Not needed for now..
+/*
 async function getReqDataType(reqId) {
     console.log("capturing request data type...")
     try {
@@ -96,16 +102,17 @@ async function getResDataType(reqId) {
         let dataType = Array.isArray(dataArr) ? dataArr.map(data => data.type).join(", ") : dataArr.type;
         return dataType;
     } catch (error) {
-        throw new Error(error);;
+        throw new Error(error);
     }
 }
-
+*/
 /** 
  * getBlobRules()
  * @returns {Promise<String>}
  * will return either one rule thats evaluated or an 
  * array of rules being evaluated in string form
 */
+/*
 async function getBlobRules(reqId) {
     console.log("capturing blob rule(s)...")
     try {
@@ -115,7 +122,7 @@ async function getBlobRules(reqId) {
         }
         let resultBlob = await azureBlob.readBlob(`${reqId}-result.json`);
         resultBlob = JSON.parse(resultBlob).response;
-        let resultData = resultBlob?.data?.attributes || resultBlob?.data;
+        let resultData = resultBlob?.data?.attributes || resultBlob?.data || "";
         let blobRule = resultData?.rule?.input || resultData?.triggeredRules || "";
         if (typeof blobRule !== "string" && blobRule !== undefined) {
             let rules = [];
@@ -130,7 +137,7 @@ async function getBlobRules(reqId) {
         throw new Error(error);;
     }
 }
-
+*/
 
 /**
  * Object Builders
@@ -138,12 +145,14 @@ async function getBlobRules(reqId) {
 async function handleStartAdd(msgObj) {
     console.log("handling start...")
     try {
-        const PK = msgObj?.text?.requestId;
+        const PK = msgObj?.text?.requestId || "";
+        const url = await getURL(PK) || "";
+        const method = msgObj?.text?.method || "";
         let objToAdd = {
             PartitionKey: PK,
             RowKey: "",
-            method: msgObj?.text?.method || "",
-            url: await getURL(PK),
+            method,
+            url,
         }
         return objToAdd;
     } catch (error) {
@@ -153,27 +162,25 @@ async function handleStartAdd(msgObj) {
 
 async function handleBodyAdd(msgObj) {
     console.log("handling body...")
+    // we need this function bc if the body-message is read first, will need to set up the row initially
     try {
-        const PK = msgObj?.text?.requestId;
+        const PK = msgObj?.text?.requestId || "";
         let objToAdd = {
             PartitionKey: PK,
             RowKey: "",
-            rule: await getBlobRules(PK) || "",
-            requestDataType: await getReqDataType(PK) || "",
-            responseDataType: await getResDataType(PK) || "",
         }
         return objToAdd;
     } catch (error) {
-        throw new Error(error);;
+        throw new Error(error);
     }
 }
 
 async function handleResultAdd(msgObj) {
     console.log("handling result...")
     try {
-        const PK = msgObj?.text?.requestId;
-        const serverTiming = msgObj?.text?.serverTiming;
-        const status = msgObj?.text?.statusCode;
+        const PK = msgObj?.text?.requestId || "";
+        const serverTiming = msgObj?.text?.serverTiming || "";
+        const status = msgObj?.text?.statusCode || "";
         let objToAdd = {
             PartitionKey: PK,
             RowKey: "",
@@ -189,10 +196,10 @@ async function handleResultAdd(msgObj) {
 async function upsertApiRequest(dataRow) {
     if (dataRow === undefined) return;
     try {
-        let callTracking = new CallTracking(); //ApiRequests
-        await callTracking.init();
-        // console.log(callTracking.table.tableStruct); // debug
-        await callTracking.merge(dataRow);
+        let apiRequest = new ApiRequest(connectionString);
+        await apiRequest.init();
+        // console.log(apiRequest.table.tableStruct); // debug
+        await apiRequest.merge(dataRow);
         console.log("data sent to table! Data: ")
         console.log(dataRow);
     } catch (error) {
@@ -200,7 +207,7 @@ async function upsertApiRequest(dataRow) {
     }
 };
 
-async function deleteMessage(id) { // change to deleteMsg
+async function deleteMessage(id) { 
     if (id === undefined) return;
     try {
         let popReceipt = await azureQueue.getPopReceipt(id);
@@ -217,11 +224,8 @@ async function main() {
     let readResult;
     readResult = await readQueue();
     while (readResult !== undefined) {
-        let objToAdd = await handleMessages(readResult);
-        //TODO put below inside handleMessages.
-        await upsertApiRequest(objToAdd);
-
-        // if able to handle message, then delete it
+        await handleMessages(readResult);
+        // if able to handle message successfully, then delete it
         await deleteMessage(readResult?.id);
         readResult = await readQueue();
     }
@@ -233,6 +237,5 @@ main().then(() => {
     console.log("done!");
 }).catch(error => {
     console.error(error)
-    //throw new Error(error);;
 });
 
