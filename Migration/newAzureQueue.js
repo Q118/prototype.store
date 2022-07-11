@@ -15,7 +15,7 @@ class AzureQueue {
             queueUrl,
             new StorageSharedKeyCredential(accountName, accountKey)
         );
-        // this.queueServiceClient = new QueueServiceClient() //! unclear yet if this will be needed
+        // this.queueServiceClient = new QueueServiceClient() 
         //? message Encoder:  new SDK does not have messageEncoder, handle it in the local implementation.
     }
 

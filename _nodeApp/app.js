@@ -2,31 +2,30 @@
 * @description This file will read queue messages, 
 * organize them with associated blobs,
 * and write them to columns in a table... asynchronously
-* TODO set up timer to run this file every x minutes
+* TODO set up timer to run this file every x minutes in Azure Webjobs
+* ? will this be set up FOR EACH tenant OR for the whole app and logic to differentiate the tenants?
 */
 const AzureBlob = require('./lib/azureBlob').AzureBlob;
 const AzureQueue = require('./lib/azureQueue').AzureQueue;
 const CallTracking = require('./models/CallTracking').CallTracking;
 
-const _ = require('lodash');
 require('dotenv').config({ path: __dirname + '/.env' });
 
-//TODO add config and tenantLOgic to this file, using below for now during dev
+//TODO get the string dynamically, using below for now during development.. 
+//waiting to talk to curt about design and question above before implementing further
 const connectionString = process.env.AZURE_STORAGE_CONNECTION_STRING;
+// the blob holds the connectionString for tenant... but starting out... knowing where to go
 
 const azureQueue = new AzureQueue(connectionString, "dev-queue");
 const azureBlob = new AzureBlob(connectionString, "dev-blobs");
 
-//! i do wonder if I should have a global objToAdd {} and use the ... operator to add to it
 
-/*
-TODO: still need to consider more outliers.. i.e how to grab rule data from a /compile route
-TODO: test out lesser used calls to ensure able to parse all of them
-*/
 
 async function readQueue() {
     try {
         const result = await AzureQueue.peekMessages(connectionString, "dev-queue", 1);
+        // change this to use getMessages() instead...
+
         // console.log(result) // debug
         let msgArr = [];
         for (const property in result) {
@@ -39,11 +38,11 @@ async function readQueue() {
         }
         return msgArr[0]; // {text: {}, id: ""}
     } catch (error) {
-        console.log(error)
+        throw new Error(error);
     }
 }
 
-async function sortMessages(msgObj) {
+async function handleMessages(msgObj) {
     if (msgObj?.text === undefined) return;
     switch (msgObj?.text?.step) {
         case "start":
@@ -67,7 +66,7 @@ async function getURL(reqId) {
         const blobURL = JSON.parse(startBlob).url || "";
         return blobURL;
     } catch (error) {
-        console.log(error)
+        throw new Error(error);
     }
 }
 
@@ -83,10 +82,10 @@ async function getReqDataType(reqId) {
         let dataType = Array.isArray(dataArr) ? dataArr.map(data => data.type).join(", ") : dataArr;
         return dataType;
     } catch (error) {
-        console.log(error)
+        throw new Error(error);
     }
 }
-
+// May not actually need to get req or res data type...
 async function getResDataType(reqId) {
     console.log("capturing response data type...")
     try {
@@ -97,7 +96,7 @@ async function getResDataType(reqId) {
         let dataType = Array.isArray(dataArr) ? dataArr.map(data => data.type).join(", ") : dataArr.type;
         return dataType;
     } catch (error) {
-        console.log(error)
+        throw new Error(error);;
     }
 }
 
@@ -105,7 +104,7 @@ async function getResDataType(reqId) {
  * getBlobRules()
  * @returns {Promise<String>}
  * will return either one rule thats evaluated or an 
- * array of rules being evaluated.. all *as* string.
+ * array of rules being evaluated in string form
 */
 async function getBlobRules(reqId) {
     console.log("capturing blob rule(s)...")
@@ -128,7 +127,7 @@ async function getBlobRules(reqId) {
         }
         return blobRule;
     } catch (error) {
-        console.log(error)
+        throw new Error(error);;
     }
 }
 
@@ -148,7 +147,7 @@ async function handleStartAdd(msgObj) {
         }
         return objToAdd;
     } catch (error) {
-        console.log(error)
+        throw new Error(error);;
     }
 }
 
@@ -165,7 +164,7 @@ async function handleBodyAdd(msgObj) {
         }
         return objToAdd;
     } catch (error) {
-        console.log(error)
+        throw new Error(error);;
     }
 }
 
@@ -183,55 +182,57 @@ async function handleResultAdd(msgObj) {
         }
         return objToAdd;
     } catch (error) {
-        console.log(error)
+        throw new Error(error);;
     }
 }
 
-async function handleEntity(dataRow) {
+async function upsertApiRequest(dataRow) {
     if (dataRow === undefined) return;
     try {
-        let callTracking = new CallTracking();
+        let callTracking = new CallTracking(); //ApiRequests
         await callTracking.init();
         // console.log(callTracking.table.tableStruct); // debug
         await callTracking.merge(dataRow);
         console.log("data sent to table! Data: ")
         console.log(dataRow);
     } catch (error) {
-        console.log(error)
+        throw new Error(error);
     }
 };
 
-async function dequeueMsg(id) {
+async function deleteMessage(id) { // change to deleteMsg
     if (id === undefined) return;
     try {
         let popReceipt = await azureQueue.getPopReceipt(id);
         await azureQueue.deleteMessage(id, popReceipt);
         console.log(`deleted message ${id}`)
     } catch (error) {
-        console.log(error)
+        throw new Error(error);
     }
 }
 
+
+
 async function main() {
-    //? keep going until all messages are used up? or nah.. handle that another way... bc can just call this whole file x amount of times with webJobs...
-    // if we do end up looping, could use the 'count' to keep track of how many messages are left in the queue.
-    // while (1 === 1) {
-    try {
-        let readResult = await readQueue();
-        let objToAdd = await sortMessages(readResult);
-        await handleEntity(objToAdd);
-        await dequeueMsg(readResult?.id); // then delete the message once above line runs successfully.
-    } catch (error) {
-        console.log(error)
+    let readResult;
+    readResult = await readQueue();
+    while (readResult !== undefined) {
+        let objToAdd = await handleMessages(readResult);
+        //TODO put below inside handleMessages.
+        await upsertApiRequest(objToAdd);
+
+        // if able to handle message, then delete it
+        await deleteMessage(readResult?.id);
+        readResult = await readQueue();
     }
-    // }
 }
 
 
 
 main().then(() => {
     console.log("done!");
-}).catch(err => {
-    console.log(err);
+}).catch(error => {
+    console.error(error)
+    //throw new Error(error);;
 });
 
