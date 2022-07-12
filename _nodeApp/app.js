@@ -8,7 +8,11 @@
 
 /** Lib */
 const AzureBlob = require('./lib/azureBlob').AzureBlob;
-const AzureQueue = require('./lib/azureQueue').AzureQueue;
+// const AzureQueue = require('./lib/azureQueue').AzureQueue;
+//! try the new one:
+const AzureQueue = require('../Migration/newAzureQueue').AzureQueue;
+
+
 /** Models */
 const ApiRequest = require('./models/ApiRequest').ApiRequest;
 
@@ -16,32 +20,35 @@ require('dotenv').config({ path: __dirname + '/.env' });
 
 //TODO get the string dynamically, using below for now during development.. 
 const connectionString = process.env.AZURE_STORAGE_CONNECTION_STRING;
-
+const accountName = process.env.ACCOUNT_NAME;
+const accountKey = process.env.ACCOUNT_KEY;
 
 //TODO: Explore using timestamp of server rather than azure supplied
 
 
-const azureQueue = new AzureQueue(connectionString, "dev-queue");
+// const azureQueue = new AzureQueue(connectionString, "dev-queue");
+//! try the new one
+const azureQueue = new AzureQueue("dev-queue", accountName, accountKey);
+
+
 const azureBlob = new AzureBlob(connectionString, "dev-blobs");
 
 
 
 async function readQueue() {
     try {
-        const result = await azureQueue.getMessages(connectionString, "dev-queue");
-
-        // console.log(result) // debug
-        let msgArr = [];
-        for (const property in result) {
-            let decryptMes = Buffer.from(result[property].messageText, 'base64').toString();
-            let messageObj = {
-                text: JSON.parse(decryptMes),
-                id: result[property].messageId,
-                popReceipt: result[property].popReceipt
-            }
-            msgArr.push(messageObj);
+        //!const result = await azureQueue.getMessages(connectionString, "dev-queue");
+        const result = await azureQueue.getMessages();
+        // console.log(result); // debug
+        if (result === undefined) return;
+        let decryptMes = Buffer.from(result.messageText, 'base64').toString();
+        let messageObj = {
+            text: JSON.parse(decryptMes),
+            id: result.messageId,
+            popReceipt: result.popReceipt
         }
-        return msgArr[0]; // {text: {}, id: ""}
+        return messageObj; // {text: {}, id: "", popReceipt: ""}
+
     } catch (error) {
         throw new Error(error);
     }
@@ -70,7 +77,7 @@ async function getDataFromStartBlob(reqId) {
     try {
         let startBlob = await azureBlob.readBlob(`${reqId}-start.json`);
         const URLfromBlob = JSON.parse(startBlob).url || "";
-        
+
         if (`${URLfromBlob}`.includes('?')) {
             // parse out the params if they exist
             url = URLfromBlob.split("?")[0];
@@ -96,7 +103,7 @@ async function handleStartAdd(msgObj) {
     console.log("handling start...")
     try {
         const PK = msgObj?.text?.requestId || "";
-        const startBlob = await getDataFromStartBlob(PK); 
+        const startBlob = await getDataFromStartBlob(PK);
         if (startBlob === undefined) return;
         // get data from start blob then parse into properties
         let objToAdd = {
@@ -164,7 +171,6 @@ async function upsertApiRequest(dataRow) {
 async function deleteMessage(id, popReceipt) {
     if (id === undefined || popReceipt === undefined) return;
     try {
-        // let popReceipt = await azureQueue.getPopReceipt(id);
         await azureQueue.deleteMessage(id, popReceipt);
         console.log(`deleted message ${id}`)
     } catch (error) {

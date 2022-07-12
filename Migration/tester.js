@@ -1,12 +1,6 @@
 const azure = require("azure-storage");
-const queueService = azure.createQueueService("DefaultEndpointsProtocol=https;AccountName=accsrusdev;AccountKey=Plumb2Rm3XSJ3aF7sSc8Mm2XiPkZe0ILMIdSAPYhkfqpvGms7SYb/5hLICuewvfWVvjtDkZcWP7MojXpS8TZuA==;BlobEndpoint=https://accsrusdev.blob.core.windows.net/;QueueEndpoint=https://accsrusdev.queue.core.windows.net/;TableEndpoint=https://accsrusdev.table.core.windows.net/;FileEndpoint=https://accsrusdev.file.core.windows.net/;");
-const queueName = "dev-queue";
 
-// queueService.getMessages(queueName, function (error, result) {
-//     if (!error) {
-//         console.log(result);
-//     }
-// });
+
 
 function getMessages() {
     return new Promise((resolve, reject) => {
@@ -20,7 +14,16 @@ function getMessages() {
     });
 }
 
-getMessages().then(result => {
+async function peekMessages() {
+    try {
+        let peekMessageResponse = await queueSvc.peekMessages();
+        return peekMessageResponse.peekedMessageItems[0];
+    } catch (error) {
+        throw new Error(error);
+    }
+}
+
+peekMessages().then(result => {
     console.log(result);
 });
 
@@ -35,3 +38,19 @@ getMessages().then(result => {
 //      });
 //    }
 //  });
+
+
+
+const response = await queueClient.receiveMessages();
+if (response.receivedMessageItems.length == 1) {
+    const receivedMessageItem = response.receivedMessageItems[0];
+    console.log("Processing & deleting message with content:", receivedMessageItem.messageText);
+    const deleteMessageResponse = await queueClient.deleteMessage(
+        receivedMessageItem.messageId,
+        receivedMessageItem.popReceipt
+    );
+    console.log(
+        "Delete message successfully, service assigned request Id:",
+        deleteMessageResponse.requestId
+    );
+}
