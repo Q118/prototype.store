@@ -89,104 +89,7 @@ async function getDataFromStartBlob(reqId) {
 }
 
 
-// async function getURL(reqId) {
-//     console.log("capturing blob url...")
-//     try {
-//         let startBlob = await azureBlob.readBlob(`${reqId}-start.json`);
-//         const URLfromBlob = JSON.parse(startBlob).url || "";
 
-//         if (`${URLfromBlob}`.includes('?')) {
-//             // remove params, if any - & we'll get them later
-//             let parsedURL = URLfromBlob.split("?")[0];
-//             return parsedURL;
-//         }
-//         return URLfromBlob;
-
-//     } catch (error) {
-//         throw new Error(error);
-//     }
-// }
-
-// async function getParams(reqId) {
-//     console.log("capturing parameters...")
-//     try {
-//         let startBlob = await azureBlob.readBlob(`${reqId}-start.json`);
-//         const URLfromBlob = JSON.parse(startBlob).url || "";
-//         if (`${URLfromBlob}`.includes('?')) {
-//             let paramArray = URLfromBlob.split("?")[1].split("&").filter(x => x.length > 0)
-//             let paramsString = paramArray.join(", ");
-//             return paramsString;
-//         }
-//         return "n/a";
-//     } catch (error) {
-//         throw new Error(error);
-//     }
-// }
-
-// Not needed for now..
-/*
-async function getReqDataType(reqId) {
-    console.log("capturing request data type...")
-    try {
-        let bodyBlob = await azureBlob.readBlob(`${reqId}-body.json`);
-        if (bodyBlob === "{}") {
-            return "n/a";
-        }
-        bodyBlob = JSON.parse(bodyBlob);
-        let dataArr = bodyBlob?.data || "";
-        let dataType = Array.isArray(dataArr) ? dataArr.map(data => data.type).join(", ") : dataArr;
-        return dataType;
-    } catch (error) {
-        throw new Error(error);
-    }
-}
-// May not actually need to get req or res data type...
-async function getResDataType(reqId) {
-    console.log("capturing response data type...")
-    try {
-        let resultBlob = await azureBlob.readBlob(`${reqId}-result.json`);
-        if (resultBlob === undefined) return "";
-        resultBlob = JSON.parse(resultBlob).response;
-        let dataArr = resultBlob?.data || "";
-        let dataType = Array.isArray(dataArr) ? dataArr.map(data => data.type).join(", ") : dataArr.type;
-        return dataType;
-    } catch (error) {
-        throw new Error(error);
-    }
-}
-*/
-/** 
- * getBlobRules()
- * @returns {Promise<String>}
- * will return either one rule thats evaluated or an 
- * array of rules being evaluated in string form
-*/
-/*
-async function getBlobRules(reqId) {
-    console.log("capturing blob rule(s)...")
-    try {
-        let bodyBlob = await azureBlob.readBlob(`${reqId}-body.json`);
-        if (bodyBlob === "{}") {
-            return "n/a";
-        }
-        let resultBlob = await azureBlob.readBlob(`${reqId}-result.json`);
-        resultBlob = JSON.parse(resultBlob).response;
-        let resultData = resultBlob?.data?.attributes || resultBlob?.data || "";
-        let blobRule = resultData?.rule?.input || resultData?.triggeredRules || "";
-        if (typeof blobRule !== "string" && blobRule !== undefined) {
-            let rules = [];
-            blobRule.forEach(element => {
-                rules.push(element.expression);
-            });
-            rules = rules.join(", ");
-            return rules;
-        }
-        return blobRule;
-    } catch (error) {
-        throw new Error(error);;
-    }
-}
-*/
 
 /**
  * Object Builders
@@ -196,22 +99,17 @@ async function handleStartAdd(msgObj) {
     try {
         const PK = msgObj?.text?.requestId || "";
         const startBlob = await getDataFromStartBlob(PK); 
+        if (startBlob === undefined) return;
         // get data from start blob then parse into properties
-        const iP = startBlob?.IP || "";
-        const url = startBlob?.url || "";
-        const params = startBlob?.params || "";
-        const method = msgObj?.text?.method || "";
-        const machineName = startBlob?.machineName || "";
         let objToAdd = {
             PartitionKey: PK,
             RowKey: "",
-            method,
-            //?...method: msgObj?.text?.method || "",
-            url,
-            params,
-            iP,
-            machineName
-        }
+            ...msgObj?.text?.method && { method: msgObj.text.method },
+            ...startBlob?.url && { url: startBlob.url },
+            ...startBlob?.params && { params: startBlob.params },
+            ...startBlob?.IP && { iP: startBlob.IP },
+            ...startBlob?.machineName && { machineName: startBlob.machineName },
+        } // cred: https://stackoverflow.com/a/47892178/13073026
         return objToAdd;
     } catch (error) {
         throw new Error(error);;
