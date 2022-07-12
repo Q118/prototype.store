@@ -34,10 +34,10 @@ class ApiRequest {
         await this.table.tableStruct
             .addString('ServerTiming')
             .addString('url')
+            .addString('MachineName')
+            .addString('IP')
+            .addString('Params')
             .addString('Status')
-            .addString('Rule')
-            .addString('RequestDataType')
-            .addString('ResponseDataType')
             .addString('Method')
         return this;
     }

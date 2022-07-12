@@ -65,7 +65,7 @@ let reqList = [
     return (a.Timestamp > b.Timestamp) ? -1 : ((a.Timestamp < b.Timestamp) ? 1 : 0)
   
   });
-  console.log(sorted)
+  // console.log(sorted)
 
 // reqList.forEach(req => {
 //   console.log(req.Timestamp)
@@ -73,15 +73,33 @@ let reqList = [
 //   delete req.Timestamp;
 // });
 
-// root: .containerOf(reqList) the root is by default the whole screen...
-// rootMargin: "100px"
 
 //? how to give a default value to an objects property
 var emptyObj = {};
 const { nonExistingAttribute = "hfjkhfajks" } = emptyObj;
 // console.log(nonExistingAttribute); // hfjkhfajks
+//! just use logical operator for the variable and then use the variab;e in the object..
 
-let isHappyHour = '🍺';
 
-// Logical Operator
-isHappyHour = isHappyHour || '🍵'; // '🍺'
+//URL
+let test = "/v1/rules?&page=1&pageSize=10&sortColumnName=name&sortDirection=ASC&searchColumnName=Code"
+let parsedParams = test.split("?")[1].split("&").filter(x => x.length > 0);
+// let paramArray = parsedParams.split("&")
+
+// console.log(parsedParams);
+
+// make the array only contain ones that are not empty strings
+
+
+
+
+// let paramMap = paramArray.filter(x => x.length > 0)
+
+let paramObj = {
+
+}
+console.log(parsedParams)
+// return parsedParams;
+
+// console.log(parsedParams)
+

@@ -12,8 +12,6 @@ const AzureQueue = require('./lib/azureQueue').AzureQueue;
 /** Models */
 const ApiRequest = require('./models/ApiRequest').ApiRequest;
 
-
-
 require('dotenv').config({ path: __dirname + '/.env' });
 
 //TODO get the string dynamically, using below for now during development.. 
@@ -49,14 +47,14 @@ async function readQueue() {
 
 async function handleMessages(msgObj) {
     if (msgObj?.text === undefined) return;
-    let resultData;
+    let objToAddToTable;
     switch (msgObj?.text?.step) {
-        case "start": resultData = await handleStartAdd(msgObj); break;
-        case "body": resultData = await handleBodyAdd(msgObj); break;
-        case "result": resultData = await handleResultAdd(msgObj); break;
+        case "start": objToAddToTable = await handleStartAdd(msgObj); break;
+        case "body": objToAddToTable = await handleBodyAdd(msgObj); break;
+        case "result": objToAddToTable = await handleResultAdd(msgObj); break;
         default: throw new Error(`Unknown step in ${msgObj}`);
     }
-    await upsertApiRequest(resultData);
+    await upsertApiRequest(objToAddToTable);
 }
 
 
@@ -67,8 +65,31 @@ async function getURL(reqId) {
     console.log("capturing blob url...")
     try {
         let startBlob = await azureBlob.readBlob(`${reqId}-start.json`);
-        const blobURL = JSON.parse(startBlob).url || "";
-        return blobURL;
+        const URLfromBlob = JSON.parse(startBlob).url || "";
+
+        if (`${URLfromBlob}`.includes('?')) {
+            // remove params, if any - & we'll get them later
+            let parsedURL = URLfromBlob.split("?")[0];
+            return parsedURL;
+        }
+        return URLfromBlob;
+
+    } catch (error) {
+        throw new Error(error);
+    }
+}
+
+async function getParams(reqId) {
+    console.log("capturing parameters...")
+    try {
+        let startBlob = await azureBlob.readBlob(`${reqId}-start.json`);
+        const URLfromBlob = JSON.parse(startBlob).url || "";
+        if (`${URLfromBlob}`.includes('?')) {
+            let paramArray = URLfromBlob.split("?")[1].split("&").filter(x => x.length > 0)
+            let paramsString = paramArray.join(", ");
+            return paramsString;
+        }
+        return "n/a";
     } catch (error) {
         throw new Error(error);
     }
@@ -147,12 +168,14 @@ async function handleStartAdd(msgObj) {
     try {
         const PK = msgObj?.text?.requestId || "";
         const url = await getURL(PK) || "";
+        const params = await getParams(PK) || "";
         const method = msgObj?.text?.method || "";
         let objToAdd = {
             PartitionKey: PK,
             RowKey: "",
             method,
             url,
+            params
         }
         return objToAdd;
     } catch (error) {
@@ -162,7 +185,7 @@ async function handleStartAdd(msgObj) {
 
 async function handleBodyAdd(msgObj) {
     console.log("handling body...")
-    // we need this function bc if the body-message is read first, will need to set up the row initially
+    // we need this function bc if the body-message is read first, will need to set up the initial row 
     try {
         const PK = msgObj?.text?.requestId || "";
         let objToAdd = {
@@ -179,8 +202,8 @@ async function handleResultAdd(msgObj) {
     console.log("handling result...")
     try {
         const PK = msgObj?.text?.requestId || "";
-        const serverTiming = msgObj?.text?.serverTiming || "";
         const status = msgObj?.text?.statusCode || "";
+        const serverTiming = msgObj?.text?.serverTiming || "";
         let objToAdd = {
             PartitionKey: PK,
             RowKey: "",
@@ -207,7 +230,7 @@ async function upsertApiRequest(dataRow) {
     }
 };
 
-async function deleteMessage(id) { 
+async function deleteMessage(id) {
     if (id === undefined) return;
     try {
         let popReceipt = await azureQueue.getPopReceipt(id);
@@ -225,6 +248,7 @@ async function main() {
     readResult = await readQueue();
     while (readResult !== undefined) {
         await handleMessages(readResult);
+
         // if able to handle message successfully, then delete it
         await deleteMessage(readResult?.id);
         readResult = await readQueue();
