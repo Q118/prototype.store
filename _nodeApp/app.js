@@ -19,6 +19,11 @@ require('dotenv').config({ path: __dirname + '/.env' });
 const connectionString = process.env.AZURE_STORAGE_CONNECTION_STRING;
 
 
+
+
+//TODO: Explore using timestamp of server rather than azure supplied
+
+
 const azureQueue = new AzureQueue(connectionString, "dev-queue");
 const azureBlob = new AzureBlob(connectionString, "dev-blobs");
 
@@ -61,39 +66,62 @@ async function handleMessages(msgObj) {
 /**
  * Data Fetching from Blobs
  */
-async function getURL(reqId) {
-    console.log("capturing blob url...")
-    try {
-        let startBlob = await azureBlob.readBlob(`${reqId}-start.json`);
-        const URLfromBlob = JSON.parse(startBlob).url || "";
-
-        if (`${URLfromBlob}`.includes('?')) {
-            // remove params, if any - & we'll get them later
-            let parsedURL = URLfromBlob.split("?")[0];
-            return parsedURL;
-        }
-        return URLfromBlob;
-
-    } catch (error) {
-        throw new Error(error);
-    }
-}
-
-async function getParams(reqId) {
-    console.log("capturing parameters...")
+async function getDataFromStartBlob(reqId) {
+    console.log("capturing start-blob data...")
+    let blobData = {};
+    let url = "", params = "", IP = "", machineName = "";
     try {
         let startBlob = await azureBlob.readBlob(`${reqId}-start.json`);
         const URLfromBlob = JSON.parse(startBlob).url || "";
         if (`${URLfromBlob}`.includes('?')) {
+            // parse out the params if they exist
+            url = URLfromBlob.split("?")[0];
             let paramArray = URLfromBlob.split("?")[1].split("&").filter(x => x.length > 0)
-            let paramsString = paramArray.join(", ");
-            return paramsString;
-        }
-        return "n/a";
+            params = paramArray.join(", ");
+        } else { url = URLfromBlob; params = "n/a"; }
+        IP = JSON.parse(startBlob).IP || "";
+        machineName = JSON.parse(startBlob).machineName || "";
+        blobData = { url, params, IP, machineName };
+        return blobData;
     } catch (error) {
         throw new Error(error);
     }
 }
+
+
+// async function getURL(reqId) {
+//     console.log("capturing blob url...")
+//     try {
+//         let startBlob = await azureBlob.readBlob(`${reqId}-start.json`);
+//         const URLfromBlob = JSON.parse(startBlob).url || "";
+
+//         if (`${URLfromBlob}`.includes('?')) {
+//             // remove params, if any - & we'll get them later
+//             let parsedURL = URLfromBlob.split("?")[0];
+//             return parsedURL;
+//         }
+//         return URLfromBlob;
+
+//     } catch (error) {
+//         throw new Error(error);
+//     }
+// }
+
+// async function getParams(reqId) {
+//     console.log("capturing parameters...")
+//     try {
+//         let startBlob = await azureBlob.readBlob(`${reqId}-start.json`);
+//         const URLfromBlob = JSON.parse(startBlob).url || "";
+//         if (`${URLfromBlob}`.includes('?')) {
+//             let paramArray = URLfromBlob.split("?")[1].split("&").filter(x => x.length > 0)
+//             let paramsString = paramArray.join(", ");
+//             return paramsString;
+//         }
+//         return "n/a";
+//     } catch (error) {
+//         throw new Error(error);
+//     }
+// }
 
 // Not needed for now..
 /*
@@ -167,15 +195,22 @@ async function handleStartAdd(msgObj) {
     console.log("handling start...")
     try {
         const PK = msgObj?.text?.requestId || "";
-        const url = await getURL(PK) || "";
-        const params = await getParams(PK) || "";
+        const startBlob = await getDataFromStartBlob(PK); 
+        // get data from start blob then parse into properties
+        const iP = startBlob?.IP || "";
+        const url = startBlob?.url || "";
+        const params = startBlob?.params || "";
         const method = msgObj?.text?.method || "";
+        const machineName = startBlob?.machineName || "";
         let objToAdd = {
             PartitionKey: PK,
             RowKey: "",
             method,
+            //?...method: msgObj?.text?.method || "",
             url,
-            params
+            params,
+            iP,
+            machineName
         }
         return objToAdd;
     } catch (error) {
@@ -242,13 +277,11 @@ async function deleteMessage(id) {
 }
 
 
-
 async function main() {
     let readResult;
     readResult = await readQueue();
     while (readResult !== undefined) {
         await handleMessages(readResult);
-
         // if able to handle message successfully, then delete it
         await deleteMessage(readResult?.id);
         readResult = await readQueue();

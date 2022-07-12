@@ -103,3 +103,12 @@ console.log(parsedParams)
 
 // console.log(parsedParams)
 
+
+
+function getStartData() {
+  return {
+    foo: "bar",
+    baz: "qux"
+  };
+}; 
+console.log(getStartData().baz); // "qux"
