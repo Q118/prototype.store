@@ -75,17 +75,18 @@ class AzureQueue {
         });
     }
 
-    getPopReceipt() {
+    getMessages() {
         return new Promise((resolve, reject) => {
             this.queueSvc.getMessages(this.queueName, function (error, serverMessages) {
                 if (error) {
                     reject(error);
                     return;
                 }
-                resolve(serverMessages[0]?.popReceipt);
+                resolve(serverMessages);
             });
         });
     }
+
 
     peekMessages(count) {
         return new Promise((resolve, reject) => {

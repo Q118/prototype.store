@@ -15,10 +15,7 @@ const ApiRequest = require('./models/ApiRequest').ApiRequest;
 require('dotenv').config({ path: __dirname + '/.env' });
 
 //TODO get the string dynamically, using below for now during development.. 
-//waiting to talk to curt about design and question above before implementing further..the blob holds the connectionString for tenant... but starting out... knowing where to go
 const connectionString = process.env.AZURE_STORAGE_CONNECTION_STRING;
-
-
 
 
 //TODO: Explore using timestamp of server rather than azure supplied
@@ -31,8 +28,7 @@ const azureBlob = new AzureBlob(connectionString, "dev-blobs");
 
 async function readQueue() {
     try {
-        const result = await AzureQueue.peekMessages(connectionString, "dev-queue", 1);
-        //! change this to use getMessages() instead...
+        const result = await azureQueue.getMessages(connectionString, "dev-queue");
 
         // console.log(result) // debug
         let msgArr = [];
@@ -40,7 +36,8 @@ async function readQueue() {
             let decryptMes = Buffer.from(result[property].messageText, 'base64').toString();
             let messageObj = {
                 text: JSON.parse(decryptMes),
-                id: result[property].messageId
+                id: result[property].messageId,
+                popReceipt: result[property].popReceipt
             }
             msgArr.push(messageObj);
         }
@@ -73,12 +70,14 @@ async function getDataFromStartBlob(reqId) {
     try {
         let startBlob = await azureBlob.readBlob(`${reqId}-start.json`);
         const URLfromBlob = JSON.parse(startBlob).url || "";
+        
         if (`${URLfromBlob}`.includes('?')) {
             // parse out the params if they exist
             url = URLfromBlob.split("?")[0];
             let paramArray = URLfromBlob.split("?")[1].split("&").filter(x => x.length > 0)
             params = paramArray.join(", ");
         } else { url = URLfromBlob; params = "n/a"; }
+
         IP = JSON.parse(startBlob).IP || "";
         machineName = JSON.parse(startBlob).machineName || "";
         blobData = { url, params, IP, machineName };
@@ -87,7 +86,6 @@ async function getDataFromStartBlob(reqId) {
         throw new Error(error);
     }
 }
-
 
 
 
@@ -163,10 +161,10 @@ async function upsertApiRequest(dataRow) {
     }
 };
 
-async function deleteMessage(id) {
-    if (id === undefined) return;
+async function deleteMessage(id, popReceipt) {
+    if (id === undefined || popReceipt === undefined) return;
     try {
-        let popReceipt = await azureQueue.getPopReceipt(id);
+        // let popReceipt = await azureQueue.getPopReceipt(id);
         await azureQueue.deleteMessage(id, popReceipt);
         console.log(`deleted message ${id}`)
     } catch (error) {
@@ -181,7 +179,7 @@ async function main() {
     while (readResult !== undefined) {
         await handleMessages(readResult);
         // if able to handle message successfully, then delete it
-        await deleteMessage(readResult?.id);
+        await deleteMessage(readResult?.id, readResult?.popReceipt);
         readResult = await readQueue();
     }
 }
