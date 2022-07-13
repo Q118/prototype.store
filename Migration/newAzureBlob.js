@@ -26,12 +26,13 @@ class AzureBlob {
         );
         this.containerName = containerName;
         this.writeBlob = this.writeBlob.bind(this);
+        this.writeBlobFromStream = this.writeBlobFromStream.bind(this);
         this.readBlob = this.readBlob.bind(this);
         this.deleteBlob = this.deleteBlob.bind(this);
         this.listAllBlobs = this.listAllBlobs.bind(this);
-        // this.listBlobs = this.listBlobs.bind(this);
-        // this.listBlobsInFolder = this.listBlobsInFolder.bind(this);
-        // this.listAllBlobsInFolder = this.listAllBlobsInFolder.bind(this);
+        // this.listBlobs = this.listBlobs.bind(this); this.listBlobsInFolder = this.listBlobsInFolder.bind(this);
+        /* we do not need either of these methods since they were used just as helpers to listAllBlobs/listAllBlobsInFoler and now we can do it all in one go and same goes for blobsInfolder. */
+        this.listAllBlobsInFolder = this.listAllBlobsInFolder.bind(this);
         this.exists = this.exists.bind(this);
     }
 
@@ -106,7 +107,6 @@ class AzureBlob {
 
     /** in old SDK, there was no built-in way to handle pagination when listing blobs in a container. Users had to use continuationToken to get the next page of result then retrieve the items.
     * In the new SDK we return a PagedAsyncIterableIterator that handles the details of pagination internally, simplifying the work of iteration.
-    * so we do not need listBlobs() method since it was used just as a helper to listAllBlobs() and now we can do it all in one go and same goes for blobsInfolder.
     */
     async listAllBlobs() {
         try {
@@ -145,11 +145,21 @@ class AzureBlob {
         } catch (error) {
             throw new Error(error);
         }
-
     }
 
-
-
+    /**
+     * Creates a new container under the specified account. If the container with
+     * the same name already exists, it is not changed.
+     * @returns {boolean} Indicates whether the container is successfully created. Is false when the container is not changed as it already exists.
+     */
+     async createContainerIfNotExists() {
+        try {
+            let responseData = await this.blobSvc.createIfNotExists();
+            return responseData;
+        } catch (error) {
+            throw new Error(error);
+        }
+    }
 
 
     async exists() {
@@ -161,19 +171,9 @@ class AzureBlob {
         }
     }
 
-    async createContainerIfNotExists() {
-        try {
-            let responseData = await this.blobSvc.createIfNotExists();
-            return responseData;
-        } catch (error) {
-            throw new Error(error);
-        }
-    }
-
     /**
      * static methods
      */
-
     static create(accountName, accountKey, containerName) {
         return new AzureBlob(accountName, accountKey, containerName);
     }
