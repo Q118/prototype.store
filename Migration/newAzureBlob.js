@@ -1,5 +1,9 @@
 const { ContainerClient, StorageSharedKeyCredential } = require("@azure/storage-blob");
 
+/**
+ * Global Utility Function
+ * @param {ReadableStream} readableStream 
+ */
 async function streamToBuffer(readableStream) {
     return new Promise((resolve, reject) => {
         const chunks = [];
@@ -35,6 +39,7 @@ class AzureBlob {
      * 
      * @param {ReadableStream} blobContent 
      * @returns Response data for the Blob Upload operation.
+     * ! upload() is a non-parallel uploading method, docs suggest use uploadFile, uploadStream or uploadBrowserData for better performance with concurrency uploading.
      */
     async writeBlob(blobName, blobContent) {
         try {
@@ -45,6 +50,27 @@ class AzureBlob {
         }
     }
 
+    /**
+     * @param {string} blobName
+     * @param {ReadableStream} streamFromBlob which will need to be converted in the local implementation to a stream from a string 
+     * ex: const { Readable } = require('stream');
+     *     streamFromBlob = Readable.from(blobContentString);
+     */
+    async writeBlobFromStream(streamFromBlob, blobName) {
+        try {
+            let bufferSize = streamFromBlob.length;
+            let blockBlobUploadRes = await this.blobSvc.getBlockBlobClient(blobName).uploadStream(streamFromBlob, bufferSize);
+            return blockBlobUploadRes;
+        } catch (error) {
+            throw new Error(error);
+        }
+    }
+
+    /**
+     * 
+     * @param {string} blobName 
+     * @returns {string} Response data for the Blob Download operation as a string.
+     */
     async readBlob(blobName) {
         try {
             let responseData = await this.blobSvc.getBlockBlobClient(blobName).download();
@@ -52,7 +78,6 @@ class AzureBlob {
             return downloaded.toString();
         } catch (error) {
             throw new Error(error);
-
         }
     }
 
@@ -65,17 +90,24 @@ class AzureBlob {
         }
     }
 
+    /**
+     * Deletes the given blob name
+     * @param {*} blobName 
+     * @returns {Boolean} true if the blob was deleted
+     */
     async deleteBlob(blobName) {
         try {
-            let responseData = await this.blobSvc.getBlockBlobClient(blobName).delete();
+            let responseData = await this.blobSvc.getBlockBlobClient(blobName).deleteIfExists();
             return responseData;
         } catch (error) {
             throw new Error(error);
         }
     }
 
-    // in old SDK, there was no built-in way to handle pagination when listing blobs in a container. Users had to use continuationToken to get the next page of result then retrieve the items.
-    //In the new SDK we return a PagedAsyncIterableIterator that handles the details of pagination internally, simplifying the work of iteration.
+    /** in old SDK, there was no built-in way to handle pagination when listing blobs in a container. Users had to use continuationToken to get the next page of result then retrieve the items.
+    * In the new SDK we return a PagedAsyncIterableIterator that handles the details of pagination internally, simplifying the work of iteration.
+    * so we do not need listBlobs() method since it was used just as a helper to listAllBlobs() and now we can do it all in one go and same goes for blobsInfolder.
+    */
     async listAllBlobs() {
         try {
             let blobItems = [];
@@ -90,6 +122,35 @@ class AzureBlob {
             throw new Error(error);
         }
     }
+
+
+    /**
+     * 
+     * @param {*} folderName - specifies the prefix of the blob names to be listed.
+     * @returns {Array.<string>} blobNames - returns an array of blob names that match the given prefix.
+     */
+    async listAllBlobsInFolder(folderName) {
+        try {
+            const items = this.blobSvc.listBlobsByHierarchy("/", { prefix: `${folderName}` });
+            let blobNames = [];
+            for await (const item of items) {
+                if (item.kind === "prefix") {
+                    console.log(`\tBlobPrefix: ${item.name}`);
+                } else {
+                    blobNames.push(item.name);
+                    console.log(`\tBlobItem: name - ${item.name}, last modified - ${item.properties.lastModified}`);
+                }
+            }
+            return blobNames;
+        } catch (error) {
+            throw new Error(error);
+        }
+
+    }
+
+
+
+
 
     async exists() {
         try {

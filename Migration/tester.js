@@ -1,56 +1,50 @@
-const azure = require("azure-storage");
+// const { AzureBlob } = require('./newAzureBlob.js');
+// const fs = require('fs');
+const { Readable } = require('stream');
 
-
-
-function getMessages() {
-    return new Promise((resolve, reject) => {
-        queueService.getMessages(queueName, function (error, serverMessages) {
-            if (error) {
-                reject(error);
-                return;
-            }
-            resolve(serverMessages);
-        });
-    });
+const { ContainerClient, StorageSharedKeyCredential } = require("@azure/storage-blob");
+let sampleJSON = {
+    "name": "John",
+    "age": 30,
+    "cars": [
+        "Ford",
+        "BMW",
+        "Fiat"
+    ]
 }
+const readable = Readable.from(JSON.stringify(sampleJSON));
+// console.log(readable)
+// let sampleStream = fs.createReadStream(sampleJSON);
 
-async function peekMessages() {
-    try {
-        let peekMessageResponse = await queueSvc.peekMessages();
-        return peekMessageResponse.peekedMessageItems[0];
-    } catch (error) {
-        throw new Error(error);
+readable.on("data", (chunk) => {
+    console.log(chunk) // will be called once with `"input string"`
+})
+const account = "accsrusdev"
+const accountKey = "Plumb2Rm3XSJ3aF7sSc8Mm2XiPkZe0ILMIdSAPYhkfqpvGms7SYb/5hLICuewvfWVvjtDkZcWP7MojXpS8TZuA==";
+const sharedKeyCredential = new StorageSharedKeyCredential(account, accountKey);
+const containerName = "dev-blobs";
+const containerClient = new ContainerClient(
+    `https://${account}.blob.core.windows.net/${containerName}`,
+    sharedKeyCredential
+);
+
+
+console.log("Listing blobs by hierarchy, specifying a prefix:");
+async function listAllBlobsInFolder() {
+    const items = containerClient.listBlobsByHierarchy("/", { prefix: "04b97" });
+    let blobNames = [];
+    for await (const item of items) {
+        // console.log(item)
+        if (item.kind === "prefix") {
+            console.log(`\tBlobPrefix: ${item.name}`);
+        } else {
+            // console.log(`\tBlobItem: name - ${item.name}, last modified - ${item.properties.lastModified}`);
+            blobNames.push(item.name)
+        }
     }
+    return blobNames;
 }
 
-peekMessages().then(result => {
-    console.log(result);
-});
-
-//  queueService.getMessages(queueName, function(error, serverMessages) {
-//    if(!error) {
-//       //Process the message in less than 30 seconds, the message
-//       //text is available in serverMessages[0].messagetext
-//      queueService.deleteMessage(queueName, serverMessages[0].messageId, serverMessages[0].popReceipt, function(error) {
-//        if(!error){
-//            // Message deleted
-//        }
-//      });
-//    }
-//  });
-
-
-
-const response = await queueClient.receiveMessages();
-if (response.receivedMessageItems.length == 1) {
-    const receivedMessageItem = response.receivedMessageItems[0];
-    console.log("Processing & deleting message with content:", receivedMessageItem.messageText);
-    const deleteMessageResponse = await queueClient.deleteMessage(
-        receivedMessageItem.messageId,
-        receivedMessageItem.popReceipt
-    );
-    console.log(
-        "Delete message successfully, service assigned request Id:",
-        deleteMessageResponse.requestId
-    );
-}
+listAllBlobsInFolder().then(blobItems => {
+    console.log(blobItems)
+})
