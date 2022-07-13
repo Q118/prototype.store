@@ -10,7 +10,7 @@
 
 const { TableClient, AzureNamedKeyCredential, TableEntity, odata } = require("@azure/data-tables");
 
-// const uuid = require('uuid').v4;
+const uuid = require('uuid').v4;
 const _ = require('lodash');
 
 //help from example: https://github.com/Azure/azure-sdk-for-js/blob/main/sdk/tables/data-tables/samples/v12/javascript/workingWithInt64.js
@@ -144,7 +144,7 @@ class AzureTableStruct {
         let entity = {};
         function buildEntity(propDef) {
             entity[propDef.entityPropName] = this.genEntityValueByPropDef(obj, propDef);
-        };  
+        };
         this.propDefs.forEach(buildEntity.bind(this));
         return entity;
     }
@@ -183,6 +183,7 @@ class AzureTableStruct {
 */
 class AzureTable {
     constructor(accountName, accountKey, tableName) {
+        // TODO add /tableName at end?
         const tablesEndpoint = `https://${accountName}.table.core.windows.net`;
         this.tableName = tableName;
         this.tableSvc = new TableClient(
@@ -200,11 +201,15 @@ class AzureTable {
         this.execQuery = this.execQuery.bind(this);
     }
 
-
+    /**
+    * calling create table will create the table used
+    * to instantiate the TableClient.
+    * **If the table already exists this function doesn't throw.**
+     */
     async init() {
         try {
             await this.tableSvc.createTable();
-            console.log(`Table created`);
+            console.log(`Table created or already exists: ${this.tableName}`);
             return;
         } catch (error) {
             throw new Error(error);
@@ -245,9 +250,9 @@ class AzureTable {
             if (obj.partitionKey === undefined || obj.rowKey === undefined) {
                 throw new Error(`PartitionKey and RowKey are required`);
             }
-            let responseData = await this.insertOrReplaceEntity(obj);
-            console.log(`Object replaced/inserted`);
-            return responseData;
+            let entity = this.tableStruct.getEntityFromObj(obj);
+            let responseData = await this.insertOrReplaceEntity(entity);
+            return this.tableStruct.getObjFromEntity(responseData);
         } catch (error) {
             throw new Error(error);
         }
@@ -258,9 +263,9 @@ class AzureTable {
             if (obj.partitionKey === undefined || obj.rowKey === undefined) {
                 throw new Error(`PartitionKey and RowKey are required`);
             }
-            let responseData = await this.insertOrMergeEntity(obj);
-            console.log(`Object merged/inserted`);
-            return responseData;
+            let entity = this.tableStruct.getEntityFromObj(obj);
+            let responseData = await this.insertOrMergeEntity(entity);
+            return this.tableStruct.getObjFromEntity(responseData);
         } catch (error) {
             throw new Error(error);
         }
@@ -283,30 +288,38 @@ class AzureTable {
 
     async retrieveObjByKey(partitionKey, rowKey) {
         try {
-            let responseData = await this.retrieveEntityByKey(partitionKey, rowKey);
-            console.log(`Object retrieved`);
-            return responseData;
+            let entity = await this.retrieveEntityByKey(partitionKey, rowKey);
+            return this.tableStruct.getObjFromEntity(entity);
         } catch (error) {
             throw new Error(error);
         }
     }
 
     // old SDK querying a table didn't provide a built in way to handle pagination and we had to use continuationToken
-    // new one, we return a PagedAsyncIterableIterator that handles the details of pagination internally, simplifying the task of iteration
+    // In the new one, we return a PagedAsyncIterableIterator that handles the details of pagination internally, simplifying the task of iteration
 
     /**
      * Retrieve an entity by PK
      */
     async retrieveObjById(id) {
         try {
-            //lists all entities where PartitionKey === id
-            const query = `PartitionKey eq '${id}'`;
-            let queryResults = await this.execQueryRaw(query)
-            return await AzureTable.convertEntityToObj(queryResults);
+            let obj;
+            const query = AzureTable.createQuery(`PartitionKey eq '${id}'`);
+
+
+
+            //! RETURN TO EXAMINE
+            let queryResults = await this.execQueryAllObj(query)
+
+            if (queryResults && queryResults.length == 1) {
+                obj = queryResults[0];
+            }
+            return obj;
         } catch (error) {
-            throw new Error(error);
+            console.error(error);
         }
     }
+
     // new SDK allows deleting an entity with just the partitionKey and rowKey
     async deleteEntityByKey(partitionKey, rowKey) {
         try {
@@ -320,14 +333,15 @@ class AzureTable {
 
     /**
      * Executes a raw, Azure Table Storage query
-     * @param {string} query
+     * @param {object} query - the filter object to supply to queryOptions
+     * ex:  { filter: odata`${fields}` };
      * @returns {PagedAsyncIterableIterator}
      */
     async execQueryRaw(query) {
         try {
             let queryResults = this.tableSvc.listEntities({
-                queryOptions: { filter: odata(query) }
-                // queryOptions: { filter: odata`amount le 3660` }
+                queryOptions: { query }
+                // ex: { filter: odata`amount le 3660` }
             });
             return queryResults;
         } catch (error) {
@@ -341,8 +355,14 @@ class AzureTable {
      */
     async execQuery(query) {
         try {
-            let queryResults = await this.execQueryRaw(query)
-            return await AzureTable.convertEntityToObj(queryResults);
+            let plainObjs = [];
+            let queryResults = await this.execQueryRaw(query);
+            if (queryResults && queryResults.length > 0) {
+                queryResults.forEach(entity => {
+                    plainObjs.push(AzureTable.convertTableStorageToObj(entity));
+                });
+            }
+            return plainObjs;
         } catch (error) {
             throw new Error(error)
         }
@@ -355,25 +375,21 @@ class AzureTable {
             all.push(...results);
             return all;
         } catch (error) {
-            throw new Error(error)
+            console.error(error);
         }
     }
-    
-    //TODO: fix above and below functions.. they need help
 
     async execQueryAllObj(query = undefined) {
         try {
             if (query === undefined) {
-                query = AzureTable.createQuery();
-                // `PartitionKey eq '${this.tableStruct.partitionKey}'`;
-                // select: '*',
-            }
+                query = AzureTable.createQuery(`PartitionKey eq '${this.tableStruct.partitionKey}'`);
+            } //returns { filter: odata`${fields}` };
             let all = [];
-            let results = await this.execQuery(query);
+            let results = await this.execQueryRaw(query);
             all.push(...results);
-            return all;
+            return all.map(this.tableStruct.getObjFromEntity);
         } catch (error) {
-            throw new Error(error)
+            console.error(error);
         }
     }
 
@@ -386,42 +402,68 @@ class AzureTable {
      */
 
     /**
-     * @param {PagedAsyncIterableIterator} queryResults
+     * @param {PagedAsyncIterableIterator} entity
      * @returns array of entities, single entity, or undefined if no entities found
      */
-    static async convertEntityToObj(queryResults) {
-        let entities = [];
-        for await (const entity of queryResults) {
-            entities.push(entity);
+    static async convertTableStorageToObj(entity) {
+        let plainObj = {};
+        for (let property in entity) {
+            if (property === 'metadata') continue;
+            plainObj[property] = entity[property];
         }
-        if (entities.length === 0) return undefined;
-        if (entities.length === 1) return entities[0];
-        return entities;
-    }         
-
-
-
-    static createQuery(fields) {
-        // deconstruct criteria
-        // use select to only return the fields we want
-        let queryOptions;                                                                
-        // {
-        //      filter: odata(string)
-        //      select: [<string>]
-        //}
-        return queryOptions
+        return plainObj;
     }
 
 
-    //TODO: add the rest of the static methods for this class
+    /**
+     * @param {string} fields - filter criteria, ex: `PartitionKey eq '${partitionKey}'`
+     */
+    static createQuery(fields) {
+        // construct criteria
+        return { filter: odata`${fields}` };
+    }
+
+    static uuid() {
+        return uuid();
+    }
+
+    // we do not need any other entGen(entGen(), uniqueKey()) methods because the new SDK allows for normal JS values
+
+
 
     static create(accountName, accountKey, tableName) {
         const table = new AzureTable(accountName, accountKey, tableName);
         return table.init();
     }
 
+
+    static async readFirst(accountName, accountKey, tableName, partitionKey, rowKey = undefined) {
+        try {
+            let azureTable = await AzureTable.create(accountName, accountKey, tableName);
+            let query;
+            if (rowKey === undefined) {
+                query = AzureTable.createQuery(`PartitionKey eq '${partitionKey}'`);
+            } else {
+                query = AzureTable.createQuery(`PartitionKey eq '${partitionKey}' and RowKey eq '${rowKey}'`);
+            }
+            return azureTable.execQuery(query);
+        } catch (error) {
+            console.error(error)
+        }
+    }
+
+// RETURN HERE TO COMPLETE THE resst of static methods
+// then go back and check again that all methods are here.
+
+
+
 }
 
+
+
+
+
+class ModelBase { }
 
 
 module.exports = {
