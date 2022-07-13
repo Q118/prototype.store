@@ -22,3 +22,6 @@ so start with a copy, then change it up, logic by logic...
 ```
 
 <!-- TODO: will eventually need to update to SiteUsers and RuleSets and other models especially for parts like selectBYusername or ID... bc querying is different with new SDK... -->
+
+
+<!-- ? So a Map is an insert-ordered key-value store for Javascript, which additionally allows mapping any value to any value, instead of restricting keys to be strings. This can greatly simplify some code where ordering is important, or where objects or other complex data types need to be associated with other data. -->

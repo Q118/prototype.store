@@ -13,13 +13,11 @@ const { TableClient, AzureNamedKeyCredential, TableEntity, odata } = require("@a
 // const uuid = require('uuid').v4;
 const _ = require('lodash');
 
-//! use example: https://github.com/Azure/azure-sdk-for-js/blob/main/sdk/tables/data-tables/samples/v12/javascript/workingWithInt64.js
-//! to set up the structure class...
+//help from example: https://github.com/Azure/azure-sdk-for-js/blob/main/sdk/tables/data-tables/samples/v12/javascript/workingWithInt64.js
 
 
 //*Previously in azure-storage, we would create our entity as an object with a specific structure for representing values, also keeping in mind that there are 2 required properties PartitionKey and RowKey in which the capital P and R respectively are important as the service is case sensitive.
-//? There were 2 ways to set the property values in azure-storage the raw way in which the value of each property is an object with a property named `_` containing the value and an optional property named $ to specify the Edm type. If no type is passed it is inferred
-//*The other way in azure-storage was to insert an entity was to use the entityGenerator which helped abstracting the creation of the value object described above
+//? There were 2 ways to set the property values in azure-storage: the raw way in which the value of each property is an object with a property named `_` containing the value and an optional property named $ to specify the Edm type. If no type is passed it is inferred The other way in azure-storage was to insert an entity was to use the entityGenerator which helped abstracting the creation of the value object described above
 //!Now in the new SDK, in order to have more idiomatic property names in our entities we have moved to *partitionKey* and *rowKey* (camel case). Also you no longer need to use the value object structure or entityGenerator anymore, instead use normal JavaScript values.
 
 const PROPERTY_TYPES = {
@@ -32,8 +30,10 @@ const PROPERTY_TYPES = {
     DOUBLE: 'Double',
     DATETIME: 'DateTime',
 }
-//So a Map is an insert-ordered key-value store for Javascript, which additionally allows mapping any value to any value, instead of restricting keys to be strings. This can greatly simplify some code where ordering is important, or where objects or other complex data types need to be associated with other data.
 
+/**
+ * @class AzureTableStruct
+*/
 class AzureTableStruct {
     constructor() {
         this.propDefs = new Map();
@@ -57,12 +57,10 @@ class AzureTableStruct {
 
     static createPropDef(entityPropName, propType, objPropName = undefined) {
         if (objPropName === undefined) {
-            // Omit required Azure Table Storage property names from lowercasing
-            // the first letter as a default.
             objPropName = entityPropName.charAt(0).toLowerCase() + entityPropName.slice(1);
         }
         let propDef = {
-            entityPropName, // e.g. 'PartitionKey' .. ? why do we need both????
+            entityPropName, // e.g. 'PartitionKey' 
             objPropName, // e.g. 'partitionKey'
             propType, // e.g. 'string'
         }
@@ -128,12 +126,13 @@ class AzureTableStruct {
                     entityValue = { value: `${objValue}`, type: "Double" };
                     break;
                 default:
-                    throw new Error(`Unknown property type: ${propDef.propType}`);
+                    throw new Error(`Unknown property type: ${propDef.propType} `);
             }
         } else {
-            throw new Error(`Property definition not found.`);
+            let msg = `Property definition not found for ${propDef.entityPropName}`
+            throw new Error(msg);
         }
-        return entityValue; // value of the entity, example: 'true', its the actual value to be stored in the table
+        return entityValue; // value of the entity, example: 'true'; its the actual *value* to be stored in the table
     }
 
     genEntityValueByPropName(obj, propName, defaultValue = undefined) {
@@ -145,14 +144,8 @@ class AzureTableStruct {
         let entity = {};
         function buildEntity(propDef) {
             entity[propDef.entityPropName] = this.genEntityValueByPropDef(obj, propDef);
-        };  //????????????????????? HOW/WHY is this working?
+        };  
         this.propDefs.forEach(buildEntity.bind(this));
-        /*
-        let self = this;
-        this.propDefs.forEach((propDef) => {
-            entity[propDef.entityPropName] = self.genEntityValueByPropDef(obj, propDef);
-        });
-        */
         return entity;
     }
 
@@ -185,7 +178,9 @@ class AzureTableStruct {
 }
 
 
-
+/**
+ * @class AzureTable
+*/
 class AzureTable {
     constructor(accountName, accountKey, tableName) {
         const tablesEndpoint = `https://${accountName}.table.core.windows.net`;
@@ -432,4 +427,5 @@ class AzureTable {
 module.exports = {
     AzureTable,
     AzureTableStruct,
+    PROPERTY_TYPES
 }
