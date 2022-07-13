@@ -7,7 +7,10 @@
 */
 
 /** Lib */
-const AzureBlob = require('./lib/azureBlob').AzureBlob;
+//! const AzureBlob = require('./lib/azureBlob').AzureBlob;
+const AzureBlob = require('../Migration/newAzureBlob').AzureBlob;
+
+
 // const AzureQueue = require('./lib/azureQueue').AzureQueue;
 //! try the new one:
 const AzureQueue = require('../Migration/newAzureQueue').AzureQueue;
@@ -26,13 +29,12 @@ const accountKey = process.env.ACCOUNT_KEY;
 //TODO: Explore using timestamp of server rather than azure supplied
 
 
-// const azureQueue = new AzureQueue(connectionString, "dev-queue");
-//! try the new one
+//! const azureQueue = new AzureQueue(connectionString, "dev-queue");
 const azureQueue = new AzureQueue("dev-queue", accountName, accountKey);
 
 
-const azureBlob = new AzureBlob(connectionString, "dev-blobs");
-
+//!const azureBlob = new AzureBlob(connectionString, "dev-blobs");
+const azureBlob = new AzureBlob(accountName, accountKey, "dev-blobs");
 
 
 async function readQueue() {
@@ -48,7 +50,6 @@ async function readQueue() {
             popReceipt: result.popReceipt
         }
         return messageObj; // {text: {}, id: "", popReceipt: ""}
-
     } catch (error) {
         throw new Error(error);
     }
