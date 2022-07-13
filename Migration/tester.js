@@ -19,8 +19,7 @@ const readable = Readable.from(JSON.stringify(sampleJSON));
 readable.on("data", (chunk) => {
     console.log(chunk) // will be called once with `"input string"`
 })
-const account = "accsrusdev"
-const accountKey = "Plumb2Rm3XSJ3aF7sSc8Mm2XiPkZe0ILMIdSAPYhkfqpvGms7SYb/5hLICuewvfWVvjtDkZcWP7MojXpS8TZuA==";
+
 const sharedKeyCredential = new StorageSharedKeyCredential(account, accountKey);
 const containerName = "dev-blobs";
 const containerClient = new ContainerClient(
