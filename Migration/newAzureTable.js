@@ -27,9 +27,9 @@ class AzureTableStruct {
         this.propDefs = new Map();
 
         // Every table MUST have these
-        this.add('PartitionKey', PROPERTY_TYPES.STRING, 'PartitionKey');
-        this.add('RowKey', PROPERTY_TYPES.STRING, 'RowKey');
-        this.add('Timestamp', PROPERTY_TYPES.DATETIME, 'Timestamp');
+        this.add('partitionKey', PROPERTY_TYPES.STRING, 'partitionKey');
+        this.add('rowKey', PROPERTY_TYPES.STRING, 'rowKey');
+        this.add('timestamp', PROPERTY_TYPES.DATETIME, 'timestamp');
 
         // Ensure this is properly bound if these are referenced in pointers
         this.add = this.add.bind(this);
@@ -87,36 +87,8 @@ class AzureTableStruct {
         let entityValue = undefined;
         let objValue = this.getObjValueByPropDef(obj, propDef, defaultValue);
         if (propDef) {
-            switch (propDef.propType) {
-                case PROPERTY_TYPES.STRING:
-                    entityValue = { value: `${objValue}`, type: "String" };
-                    break;
-                case PROPERTY_TYPES.INT64:
-                    entityValue = { value: `${objValue}`, type: "Int64" };
-                    break;
-                case PROPERTY_TYPES.DATETIME:
-                    entityValue = { value: `${objValue}`, type: "DateTime" };
-                    //? must be in ISO 8601 format (e.g. "2019-01-01T00:00:00.000Z")
-                    break;
-                case PROPERTY_TYPES.BOOLEAN:
-                    objValue = Boolean(objValue || false);
-                    entityValue = { value: `${objValue}`, type: "Boolean" };
-                    break;
-                case PROPERTY_TYPES.INT32:
-                    entityValue = { value: `${objValue}`, type: "Int32" };
-                    break;
-                case PROPERTY_TYPES.BINARY:
-                    entityValue = { value: `${objValue}`, type: "Binary" };
-                    break;
-                case PROPERTY_TYPES.GUID:
-                    entityValue = { value: `${objValue}`, type: "Guid" };
-                    break;
-                case PROPERTY_TYPES.DOUBLE:
-                    entityValue = { value: `${objValue}`, type: "Double" };
-                    break;
-                default:
-                    throw new Error(`Unknown property type: ${propDef.propType} `);
-            }
+            // we no longer need the big switch statement bc we can use normal JS values to insert directly
+            entityValue = objValue;
         } else {
             let msg = `Property definition not found for ${propDef.entityPropName}`
             throw new Error(msg);
@@ -248,6 +220,8 @@ class AzureTable {
     }
 
     async insertOrMergeObj(obj) {
+        console.log(typeof obj)
+        console.log(obj);
         try {
             if (obj.partitionKey === undefined || obj.rowKey === undefined) {
                 throw new Error(`PartitionKey and RowKey are required`);

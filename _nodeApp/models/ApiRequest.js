@@ -4,8 +4,11 @@
 const _ = require('lodash');
 
 // const config = require('../config');
-const { AzureTable } = require('../lib/azureTable');
-const { AzureBlob } = require('../lib/azureBlob');
+//! const { AzureTable } = require('../lib/azureTable');
+const { AzureTable } = require('../../Migration/newAzureTable');
+
+//! const { AzureBlob } = require('../lib/azureBlob');
+const { AzureBlob } = require('../../Migration/newAzureBlob');
 
 class ApiRequest {
     constructor(accountName, accountKey) {
@@ -16,7 +19,6 @@ class ApiRequest {
         //TODO: change this name once done with development  --- "api-requests"
         this.tableName = "devAPItable";
 
-
         this.init = this.init.bind(this);
         this.create = this.create.bind(this);
         this.save = this.save.bind(this);
@@ -24,6 +26,9 @@ class ApiRequest {
         this.remove = this.remove.bind(this);
         this.selectDataBlob = this.selectDataBlob.bind(this);
         this.selectAll = this.selectAll.bind(this);
+
+
+
     }
 
     async init() {

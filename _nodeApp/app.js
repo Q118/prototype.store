@@ -24,7 +24,7 @@ const ApiRequest = require('./models/ApiRequest').ApiRequest;
 require('dotenv').config({ path: __dirname + '/.env' });
 
 //TODO get the string dynamically, using below for now during development.. 
-const connectionString = process.env.AZURE_STORAGE_CONNECTION_STRING;
+// const connectionString = process.env.AZURE_STORAGE_CONNECTION_STRING;
 const accountName = process.env.ACCOUNT_NAME;
 const accountKey = process.env.ACCOUNT_KEY;
 
@@ -110,8 +110,8 @@ async function handleStartAdd(msgObj) {
         if (startBlob === undefined) return;
         // get data from start blob then parse into properties
         let objToAdd = {
-            PartitionKey: PK,
-            RowKey: "",
+            partitionKey: PK,
+            rowKey: "",
             ...msgObj?.text?.method && { method: msgObj.text.method },
             ...startBlob?.url && { url: startBlob.url },
             ...startBlob?.params && { params: startBlob.params },
@@ -130,8 +130,8 @@ async function handleBodyAdd(msgObj) {
     try {
         const PK = msgObj?.text?.requestId || "";
         let objToAdd = {
-            PartitionKey: PK,
-            RowKey: "",
+            partitionKey: PK,
+            rowKey: "",
         }
         return objToAdd;
     } catch (error) {
@@ -146,8 +146,8 @@ async function handleResultAdd(msgObj) {
         const status = msgObj?.text?.statusCode || "";
         const serverTiming = msgObj?.text?.serverTiming || "";
         let objToAdd = {
-            PartitionKey: PK,
-            RowKey: "",
+            partitionKey: PK,
+            rowKey: "",
             status,
             serverTiming,
         }
@@ -157,10 +157,14 @@ async function handleResultAdd(msgObj) {
     }
 }
 
+/**
+ * @param {Object} dataRow - object to add to table
+ * 
+ */ 
 async function upsertApiRequest(dataRow) {
     if (dataRow === undefined) return;
     try {
-        let apiRequest = new ApiRequest(connectionString);
+        let apiRequest = new ApiRequest(accountName, accountKey);
         await apiRequest.init();
         // console.log(apiRequest.table.tableStruct); // debug
         await apiRequest.merge(dataRow);
