@@ -56,6 +56,7 @@ class AzureBlob {
      * @param {ReadableStream} streamFromBlob which will need to be converted in the local implementation to a stream from a string 
      * ex: const { Readable } = require('stream');
      *     streamFromBlob = Readable.from(blobContentString);
+     * ! use this over writeBlob whenever possible.
      */
     async writeBlobFromStream(streamFromBlob, blobName) {
         try {

@@ -12,12 +12,14 @@ const AzureBlob = require('../Migration/newAzureBlob').AzureBlob;
 
 
 // const AzureQueue = require('./lib/azureQueue').AzureQueue;
-//! try the new one:
+//! tried the new one and tested working here
 const AzureQueue = require('../Migration/newAzureQueue').AzureQueue;
 
 
 /** Models */
 const ApiRequest = require('./models/ApiRequest').ApiRequest;
+//! trying the new table by using it in ^^
+
 
 require('dotenv').config({ path: __dirname + '/.env' });
 

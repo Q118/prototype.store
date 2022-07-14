@@ -26,14 +26,22 @@ const obj = new Object();
 map.set(1, "value");
 obj["key"] = "value";
 
-console.log(map.get(1));
-console.log(obj["key"]);
+// console.log(map.get(1));
+// console.log(obj["key"]);
 
-console.log(map.has("key"));
-console.log(obj.hasOwnProperty("key"));
-console.log(`\n`);
+// console.log(map.has("key"));
+// console.log(obj.hasOwnProperty("key"));
+// console.log(`\n`);
 
-console.log(map);
-console.log(obj);
+// console.log(map);
+// console.log(obj);
 
-console.log(typeof BigInt(43351435454115235));
+// console.log(typeof BigInt(43351435454115235));
+
+let entityPropName = "partitionKey";
+let objPropName = undefined;
+
+objPropName = entityPropName.charAt(0).toLowerCase() + entityPropName.slice(1);
+console.log(objPropName);
+
+

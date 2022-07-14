@@ -8,9 +8,14 @@ const { AzureTable } = require('../lib/azureTable');
 const { AzureBlob } = require('../lib/azureBlob');
 
 class ApiRequest {
-    constructor(storageConnectionString) {
+    constructor(accountName, accountKey) {
 
-        this.storageConnectionString = storageConnectionString;
+        this.accountName = accountName;
+        this.accountKey = accountKey;
+
+        //TODO: change this name once done with development  --- "api-requests"
+        this.tableName = "devAPItable";
+
 
         this.init = this.init.bind(this);
         this.create = this.create.bind(this);
@@ -18,18 +23,19 @@ class ApiRequest {
         this.merge = this.merge.bind(this);
         this.remove = this.remove.bind(this);
         this.selectDataBlob = this.selectDataBlob.bind(this);
-        //this.selectByUsername = this.selectByUsername.bind(this);
         this.selectAll = this.selectAll.bind(this);
     }
 
-    async init(storageConnectionString) {
-        if (storageConnectionString) {
-            this.storageConnectionString = storageConnectionString;
-        }
-        this.table = new AzureTable(this.storageConnectionString, 'devAPItable');
+    async init() {
+        // if (storageConnectionString) {
+        //     this.storageConnectionString = storageConnectionString;
+        // }
+
+        this.table = new AzureTable(this.accountName, this.accountKey, this.tableName);
         await this.table.init();
 
-        this.blob = new AzureBlob(this.storageConnectionString, 'dev-blobs');
+        //TODO: change this blobName once done with development
+        this.blob = new AzureBlob(this.accountName, this.accountKey, 'dev-blobs');
 
         await this.table.tableStruct
             .addString('ServerTiming')
@@ -42,18 +48,16 @@ class ApiRequest {
         return this;
     }
 
-
     async create(item) {
         return this.save(item);
     }
 
-
     async saveDataBlob(obj) {
         let name = _.get(obj, 'PartitionKey');
-        name = name + '.json';
         if (!name) {
-            name = uniqueId();
+            name = AzureTable.uuid();
         }
+        name = `${name}.json`;
         let content = _.get(obj, 'data', '');
         this.blob.writeBlob(name, content);
         return name;
@@ -77,8 +81,8 @@ class ApiRequest {
 
     async selectDataBlob(obj) {
         let name = _.get(obj, 'PartitionKey');
-        name = name + '.json';
         if (!name) return undefined;
+        name = `${name}.json`;
         let content = undefined;
         try {
             content = await this.blob.readBlob(name);
@@ -107,16 +111,14 @@ class ApiRequest {
         return items;
     }
 
-    /*
+
     static genGuid() {
         return AzureTable.uuid();
     }
-    */
+
 
     async selectByCode(code) {
-        let query = AzureTable.createQuery()
-            .top(1)
-            .where('Code eq ?', code);
+        let query = AzureTable.createQuery(`Code eq ${code}`);
         let rows = await this.table.execQueryAllObj(query);
         if (rows && rows.length && rows.length === 1) {
             let row = rows[0];

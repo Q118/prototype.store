@@ -1,13 +1,13 @@
 /**
  * Azure Table Utility
  * made with new SDK 
- * TODO: refactor CallTracking after this
+ * TODO: refactor ../models/ApiRequest after this
  */
 const { TableClient, AzureNamedKeyCredential, TableEntity, odata } = require("@azure/data-tables");
 const uuid = require('uuid').v4;
 const _ = require('lodash');
-//Previously in azure-storage, we would create our entity as an object with a specific structure for representing values, also keeping in mind that there are 2 required properties PartitionKey and RowKey in which the capital P and R respectively are important as the service is case sensitive.
-//in the new SDK, its moved to *partitionKey* and *rowKey* (camel case). Also you no longer need to use the value object structure or entityGenerator anymore, instead use normal JavaScript values.
+//Previously in azure-storage, we would create our entity as an object with a specific structure for representing values
+//in the new SDK, we can use *partitionKey* and *rowKey* (camel case). Also you no longer need to use the value object structure or entityGenerator anymore, instead use normal JavaScript values.
 const PROPERTY_TYPES = {
     INT32: 'Int32',
     INT64: 'Int64',
@@ -45,6 +45,7 @@ class AzureTableStruct {
 
     static createPropDef(entityPropName, propType, objPropName = undefined) {
         if (objPropName === undefined) {
+            // ensure we camelCase
             objPropName = entityPropName.charAt(0).toLowerCase() + entityPropName.slice(1);
         }
         let propDef = {
