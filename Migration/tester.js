@@ -1,49 +1,63 @@
-// const { AzureBlob } = require('./newAzureBlob.js');
-// const fs = require('fs');
-const { Readable } = require('stream');
+const { odata, TableClient, AzureNamedKeyCredential } = require("@azure/data-tables");
 
-const { ContainerClient, StorageSharedKeyCredential } = require("@azure/storage-blob");
-let sampleJSON = {
-    "name": "John",
-    "age": 30,
-    "cars": [
-        "Ford",
-        "BMW",
-        "Fiat"
-    ]
-}
-const readable = Readable.from(JSON.stringify(sampleJSON));
-// console.log(readable)
-// let sampleStream = fs.createReadStream(sampleJSON);
-
-readable.on("data", (chunk) => {
-    console.log(chunk) // will be called once with `"input string"`
-})
-
-const sharedKeyCredential = new StorageSharedKeyCredential(account, accountKey);
-const containerName = "dev-blobs";
-const containerClient = new ContainerClient(
-    `https://${account}.blob.core.windows.net/${containerName}`,
-    sharedKeyCredential
-);
+// Load the .env file if it exists
+const dotenv = require("dotenv");
+dotenv.config();
 
 
-console.log("Listing blobs by hierarchy, specifying a prefix:");
-async function listAllBlobsInFolder() {
-    const items = containerClient.listBlobsByHierarchy("/", { prefix: "04b97" });
-    let blobNames = [];
-    for await (const item of items) {
-        // console.log(item)
-        if (item.kind === "prefix") {
-            console.log(`\tBlobPrefix: ${item.name}`);
-        } else {
-            // console.log(`\tBlobItem: name - ${item.name}, last modified - ${item.properties.lastModified}`);
-            blobNames.push(item.name)
-        }
+
+async function queryTables() {
+    console.log("== Query tables Sample ==");
+
+    // See authenticationMethods sample for other options of creating a new client
+    // const serviceClient = TableServiceClient.fromConnectionString(accountConnectionString);
+const tableName = `devTester2`;
+
+    const tbl = new TableClient(
+        tablesEndpoint,
+        tableName,
+        new AzureNamedKeyCredential(accountName, accountKey)
+    );
+
+
+// list entities returns a AsyncIterableIterator
+// this helps consuming paginated responses by
+// automatically handling getting the next pages
+// const entities = client.listEntities();
+
+// this loop will get all the entities from all the pages
+// returned by the service
+// for await (const entity of entities) {
+// console.log(entity);
+// }
+
+
+    // Create a new table
+    
+    // await serviceClient.createTable(tableName);
+
+    // list the tables with a filter query, queryOptions is optional.
+    // odata is a helper function that takes care of encoding the query
+    // filter, in this sample it will add quotes around tableName
+    const queryTableResults = tbl.listEntities({
+        queryOptions: { filter: `` }
+    });
+
+    console.log(queryTableResults)
+
+    // Iterate the results
+    for await (const entity of queryTableResults) {
+        console.log(entity);
     }
-    return blobNames;
+
+    // Deletes the table
+    // await serviceClient.deleteTable(tableName);
 }
 
-listAllBlobsInFolder().then(blobItems => {
-    console.log(blobItems)
-})
+async function main() {
+    await queryTables();
+}
+
+main().catch((err) => {
+    console.error("The sample encountered an error:", err);
+});

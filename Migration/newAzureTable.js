@@ -1,25 +1,13 @@
 /**
- * this file to create a new classes for the Azure Table
- * with the new SDK
- * prob most important because this class is used 
- * heavily throughout rules-engine API
- * TODO: will also need to refactor CallTracking after this
+ * Azure Table Utility
+ * made with new SDK 
+ * TODO: refactor CallTracking after this
  */
-
-
-
 const { TableClient, AzureNamedKeyCredential, TableEntity, odata } = require("@azure/data-tables");
-
 const uuid = require('uuid').v4;
 const _ = require('lodash');
-
-//help from example: https://github.com/Azure/azure-sdk-for-js/blob/main/sdk/tables/data-tables/samples/v12/javascript/workingWithInt64.js
-
-
-//*Previously in azure-storage, we would create our entity as an object with a specific structure for representing values, also keeping in mind that there are 2 required properties PartitionKey and RowKey in which the capital P and R respectively are important as the service is case sensitive.
-//? There were 2 ways to set the property values in azure-storage: the raw way in which the value of each property is an object with a property named `_` containing the value and an optional property named $ to specify the Edm type. If no type is passed it is inferred The other way in azure-storage was to insert an entity was to use the entityGenerator which helped abstracting the creation of the value object described above
-//!Now in the new SDK, in order to have more idiomatic property names in our entities we have moved to *partitionKey* and *rowKey* (camel case). Also you no longer need to use the value object structure or entityGenerator anymore, instead use normal JavaScript values.
-
+//Previously in azure-storage, we would create our entity as an object with a specific structure for representing values, also keeping in mind that there are 2 required properties PartitionKey and RowKey in which the capital P and R respectively are important as the service is case sensitive.
+//in the new SDK, its moved to *partitionKey* and *rowKey* (camel case). Also you no longer need to use the value object structure or entityGenerator anymore, instead use normal JavaScript values.
 const PROPERTY_TYPES = {
     INT32: 'Int32',
     INT64: 'Int64',
@@ -93,7 +81,7 @@ class AzureTableStruct {
     }
 
     // ref example for setting types: https://stack247.wordpress.com/2021/08/21/azure-data-table-query-in-typescript/ 
-
+    //and: https://github.com/Azure/azure-sdk-for-js/blob/main/sdk/tables/data-tables/samples/v12/javascript/workingWithInt64.js
     genEntityValueByPropDef(obj, propDef, defaultValue = undefined) {
         let entityValue = undefined;
         let objValue = this.getObjValueByPropDef(obj, propDef, defaultValue);
@@ -132,7 +120,7 @@ class AzureTableStruct {
             let msg = `Property definition not found for ${propDef.entityPropName}`
             throw new Error(msg);
         }
-        return entityValue; // value of the entity, example: 'true'; its the actual *value* to be stored in the table
+        return entityValue; // value of the entity, example: "true"; its the actual *value* to be stored in the table
     }
 
     genEntityValueByPropName(obj, propName, defaultValue = undefined) {
@@ -291,7 +279,7 @@ class AzureTable {
             let entity = await this.retrieveEntityByKey(partitionKey, rowKey);
             return this.tableStruct.getObjFromEntity(entity);
         } catch (error) {
-            throw new Error(error);
+            console.error(error);
         }
     }
 
@@ -305,12 +293,7 @@ class AzureTable {
         try {
             let obj;
             const query = AzureTable.createQuery(`PartitionKey eq '${id}'`);
-
-
-
-            //! RETURN TO EXAMINE
             let queryResults = await this.execQueryAllObj(query)
-
             if (queryResults && queryResults.length == 1) {
                 obj = queryResults[0];
             }
@@ -382,7 +365,7 @@ class AzureTable {
     async execQueryAllObj(query = undefined) {
         try {
             if (query === undefined) {
-                query = AzureTable.createQuery(`PartitionKey eq '${this.tableStruct.partitionKey}'`);
+                query = AzureTable.createQuery(`PartitionKey eq ${this.tableStruct.partitionKey}`);
             } //returns { filter: odata`${fields}` };
             let all = [];
             let results = await this.execQueryRaw(query);
@@ -417,9 +400,13 @@ class AzureTable {
 
     /**
      * @param {string} fields - filter criteria, ex: `PartitionKey eq '${partitionKey}'`
+     * @var {odata} odata - a helper function that takes care of encoding the query filter, it will add quotes around any ${} variables
      */
     static createQuery(fields) {
         // construct criteria
+        if (fields === ``) {
+            return { filter: `` };
+        }
         return { filter: odata`${fields}` };
     }
 
@@ -427,24 +414,22 @@ class AzureTable {
         return uuid();
     }
 
-    // we do not need any other entGen(entGen(), uniqueKey()) methods because the new SDK allows for normal JS values
-
-
+    // we do not need any other entGen(entGen(), uniqueKey()) methods because the new SDK allows for normal JS values to be used without entityGenerator. 
+    // https://github.com/Azure/azure-sdk-for-js/blob/main/sdk/tables/data-tables/MigrationGuide.md#adding-data-to-the-table
 
     static create(accountName, accountKey, tableName) {
         const table = new AzureTable(accountName, accountKey, tableName);
         return table.init();
     }
 
-
     static async readFirst(accountName, accountKey, tableName, partitionKey, rowKey = undefined) {
         try {
             let azureTable = await AzureTable.create(accountName, accountKey, tableName);
             let query;
             if (rowKey === undefined) {
-                query = AzureTable.createQuery(`PartitionKey eq '${partitionKey}'`);
+                query = AzureTable.createQuery(`PartitionKey eq ${partitionKey}`);
             } else {
-                query = AzureTable.createQuery(`PartitionKey eq '${partitionKey}' and RowKey eq '${rowKey}'`);
+                query = AzureTable.createQuery(`PartitionKey eq ${partitionKey} and RowKey eq '${rowKey}'`);
             }
             return azureTable.execQuery(query);
         } catch (error) {
@@ -452,8 +437,20 @@ class AzureTable {
         }
     }
 
-// RETURN HERE TO COMPLETE THE resst of static methods
-// then go back and check again that all methods are here.
+    /**
+     * 
+     * @function readAll - reads all entities, so no filter
+     * **supply odata with <``> and that will return all entities
+     */
+    static async readAll(accountName, accountKey, tableName) {
+        try {
+            let azureTable = await AzureTable.create(accountName, accountKey, tableName);
+            let query = AzureTable.createQuery(``);
+            return azureTable.execQueryAll(query);
+        } catch (error) {
+            console.error(error)
+        }
+    }
 
 
 
@@ -463,11 +460,15 @@ class AzureTable {
 
 
 
-class ModelBase { }
+class ModelBase {
+    //? I do not see any usage of this class throughout the codebase of rulesENgine
+    //TODO confirm with curt if we need this class
+}
 
 
 module.exports = {
     AzureTable,
     AzureTableStruct,
+    ModelBase,
     PROPERTY_TYPES
 }
