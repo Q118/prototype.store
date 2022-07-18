@@ -1,5 +1,7 @@
 const { ContainerClient, StorageSharedKeyCredential } = require("@azure/storage-blob");
 
+const { Readable } = require('stream');
+
 /**
  * Global Utility Function
  * @param {ReadableStream} readableStream 
@@ -53,13 +55,13 @@ class AzureBlob {
 
     /**
      * @param {string} blobName
-     * @param {ReadableStream} streamFromBlob which will need to be converted in the local implementation to a stream from a string 
-     * ex: const { Readable } = require('stream');
-     *     streamFromBlob = Readable.from(blobContentString);
+     * @param {*} blobContent 
      * ! use this over writeBlob whenever possible.
      */
-    async writeBlobFromStream(streamFromBlob, blobName) {
+
+    async writeBlobFromStream(blobContent, blobName) {
         try {
+            let streamFromBlob = Readable.from(blobContent.toString());
             let bufferSize = streamFromBlob.length;
             let blockBlobUploadRes = await this.blobSvc.getBlockBlobClient(blobName).uploadStream(streamFromBlob, bufferSize);
             return blockBlobUploadRes;

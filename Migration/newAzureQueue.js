@@ -1,19 +1,22 @@
+/**
+ * @class AzureQueue
+ * utilizes the new @azure/storage-queue SDK, where instances of QueueClient are used for queue operations.
+ * since fromConnectionString is only allowed on QueueServiceClient, we must use account and key for creating QueueClient
+ */
 const { QueueClient, QueueServiceClient, StorageSharedKeyCredential } = require("@azure/storage-queue");
 
-// use QueueClient to manipulate messages in a queue -- URL to the QUEUE
-// use QueueServiceClient to manipulate queues in a storage account -- URL to the STORAGE ACCOUNT
-//in the new @azure/storage-queue SDK, instances of QueueClient would be used for queue operations.
 
 
 class AzureQueue {
     constructor(queueName, accountName, accountKey) {
         let queueUrl = `https://${accountName}.queue.core.windows.net/${queueName}`;
+        // we can 
         this.queueSvc = new QueueClient( // creates an instance of the QueueClient class
             queueUrl,
             new StorageSharedKeyCredential(accountName, accountKey)
         );
         // this.queueServiceClient = new QueueServiceClient() 
-        //? message Encoder:  new SDK does not have messageEncoder, handle it in the local implementation.
+        //message Encoder:  new SDK does not have messageEncoder, handle it in the local implementation.
     }
 
     /**

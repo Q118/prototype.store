@@ -1,7 +1,7 @@
 /**
  * Azure Table Utility
- * made with new SDK 
- * TODO: refactor ../models/ApiRequest after this
+ * made with newer SDK 
+ * ! use this for now until all set then c/p into azureTable.js
  */
 const { TableClient, AzureNamedKeyCredential, TableEntity, odata } = require("@azure/data-tables");
 const uuid = require('uuid').v4;
@@ -330,7 +330,9 @@ class AzureTable {
         try {
             let all = [];
             let results = await this.execQuery(query);
-            all.push(...results);
+            if (Array.isArray(results)) {
+                all.push(...results)
+            } else { all.push({ ...results }) }
             return all;
         } catch (error) {
             console.error(error);
@@ -344,7 +346,10 @@ class AzureTable {
             } //returns { filter: odata`${fields}` };
             let all = [];
             let results = await this.execQueryRaw(query);
-            all.push(...results);
+            // if (Array.isArray(results)) { 
+            all.push({ ...results.entries })
+            // } else { all.push(results) }
+
             return all.map(this.tableStruct.getObjFromEntity);
         } catch (error) {
             console.error(error);
@@ -420,8 +425,13 @@ class AzureTable {
     static async readAll(accountName, accountKey, tableName) {
         try {
             let azureTable = await AzureTable.create(accountName, accountKey, tableName);
-            let query = AzureTable.createQuery(``);
-            return azureTable.execQueryAll(query);
+            // let query = AzureTable.createQuery(``);
+            let entities = [];
+            const data = azureTable.tableSvc.listEntities();
+            for await (const entity of data) {
+                entities.push(entity);
+            }
+            return entities;
         } catch (error) {
             console.error(error)
         }
