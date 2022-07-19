@@ -4,10 +4,8 @@
 const _ = require('lodash');
 
 // const config = require('../config');
-//! const { AzureTable } = require('../lib/azureTable');
-const { AzureTable } = require('../../Migration/newAzureTable');
 
-//! const { AzureBlob } = require('../lib/azureBlob');
+const { AzureTable } = require('../../Migration/newAzureTable');
 const { AzureBlob } = require('../../Migration/newAzureBlob');
 
 class ApiRequest {
